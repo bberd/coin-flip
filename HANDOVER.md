@@ -44,18 +44,37 @@ thing to do.
 - **Score**: tracked client-side on each browser independently (each side infers
   the same outcome from the same `result` + `calledSide`, so they should always
   agree — not verified in a live test yet).
-- **Coin art**: two hand-built inline SVGs (not images) — an "obverse" laureate
-  profile bust with "IMP · CAESAR" and a "reverse" spread-wing eagle with
-  "S P Q R", aged-bronze radial gradient, beaded dotted border, and a
-  `feTurbulence`/`feDisplacementMap` filter that gives the coin edge a slightly
-  hand-struck, non-perfect-circle look.
+- **Coin art**: two hand-built inline SVGs (not images). Obverse is a 24-ray
+  radiate crown around a faceted boss, legend "HEADS"; reverse is a laurel
+  wreath opening at the top around "SPQR", legend "TAILS". Both carry "MMXXVI"
+  on the lower rim. Every emblem is generated from polar math (rays at 2pi*i/N,
+  wreath leaves swept along an arc), so symmetry is exact rather than
+  hand-tuned — if you edit them, regenerate rather than nudging coordinates.
+  Relief is faked by drawing each emblem three times: a dark copy offset +1.5px,
+  a light copy offset -1.2px, then the solid on top. A
+  `feTurbulence`/`feDisplacementMap` filter roughens the strike.
+  Both faces name their side in the legend, so a result is readable at a glance
+  without consulting the text below the coin.
 
-## Design tokens (for consistency if extending)
-- Background: deep felt green (`--felt-dark #0d3b2e`, `--felt #12503e`)
-- Coin metal: antique bronze-gold (`#e8c98a` → `#5f4726` radial gradient)
-- Accent/buttons: bronze (`--bronze #b9793f`)
-- Text: cream (`--cream #f2e9d8`)
-- Type: system sans for UI, Georgia/serif for the coin legends and headline
+## Design direction — "Struck"
+An engraver's proof sheet at night. The page splits into two mirrored
+territories, yours and theirs, divided by an engraved seam that the coin sits
+on; the winning territory takes a patina rule and a soft wash after each flip.
+
+- Ground: indigo-slate (`--ink #0f1420`), vignetted via a radial gradient
+- Metal: brass (`--brass-hi #f3dca4`, `--brass #c9a24d`, `--brass-deep #7a5d24`)
+- Win state: verdigris (`--patina #5fa892`) — the colour brass actually oxidises
+  to, used *only* to mark the winner. Don't spend it elsewhere.
+- Text: chalk (`--chalk #ece8dd`, `--chalk-dim #8b8877`)
+- Type: Bodoni Moda for the wordmark, verdict line and coin legends (banknote /
+  medal engraving lineage); IBM Plex Mono for every label, input and ledger
+  figure. Both from Google Fonts, with local fallbacks — the page is now no
+  longer dependency-free at render time, though it degrades to the fallbacks.
+- **Signature**: the guilloche rosette behind the coin is a real hypotrochoid,
+  the curve family used for banknote and coin-die security engraving, generated
+  offline and inlined as two `<path>`s (~15KB of the file). It rotates 120
+  degrees while the coin is in the air. It is the one loud element — keep
+  everything around it quiet.
 
 ## Known gaps / suggested next steps
 1. **Live two-device test** — deploy to GitHub Pages, open on two separate
@@ -67,8 +86,9 @@ thing to do.
 3. **Reconnection handling** — if the guest refreshes or the connection drops
    mid-session, there's currently no reconnect/retry flow; it just shows
    "Opponent disconnected."
-4. **Mobile layout** — built responsive-ish (single column, no media queries
-   added) but not checked on an actual small screen.
+4. **Mobile layout** — the two-territory split holds down to 320px via a
+   `max-width: 380px` media query that shrinks the coin and rosette. Verified by
+   rendering at that width, not on a physical handset.
 5. **Optional**: self-host a PeerServer instead of relying on the public broker,
    if this needs to be more reliable than "casual use."
 6. **Deployment**: create a GitHub repo, add `index.html` at the root, enable
