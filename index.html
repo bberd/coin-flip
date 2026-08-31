@@ -611,7 +611,11 @@
     recovery.hidden = false;
   }
 
-  // Taking over the room the link points at, so the link stays valid.
+  // Both keep the link that was already shared. Rejoin retries the same room;
+  // takeover claims its id so the link points at us instead.
+  function rejoinTarget() {
+    return location.pathname + '?room=' + encodeURIComponent(roomId);
+  }
   function takeoverTarget() {
     return location.pathname + '?host=' + encodeURIComponent(roomId);
   }
@@ -731,8 +735,9 @@
       // The host keeps a live link others can still join, so only the guest is
       // actually stranded here.
       if (!isHost) {
-        offerRestart('The host has left this toss', takeoverTarget(),
-                     'Host this room yourself', 'The link you opened keeps working');
+        offerRestart('The connection to the host dropped', rejoinTarget(),
+                     'Try to rejoin',
+                     'If they have gone for good you can take the room over');
       }
     });
   }
@@ -833,28 +838,39 @@
   });
 
   // --- PeerJS connection setup ---
-  peer = hostId ? new Peer(hostId) : new Peer();
+  // The broker frees an id about a second after its peer goes away, so a claim
+  // made too soon is refused. Retrying rides that out rather than silently
+  // handing out a new room id and invalidating the shared link.
+  const MAX_CLAIM_RETRIES = 4;
+  let claimRetries = 0;
 
-  peer.on('open', function (id) {
-    if (isHost) {
-      inviteLink.value = location.origin + location.pathname + '?room=' + id;
-      inviteBox.hidden = false;
-      updateStatus();
-    } else {
-      conn = peer.connect(roomId);
-      setupConn();
-      updateStatus();
-    }
-  });
+  function startPeer() {
+    peer = hostId ? new Peer(hostId) : new Peer();
 
-  if (isHost) {
-    peer.on('connection', function (c) {
-      conn = c;
-      setupConn();
+    peer.on('open', function (id) {
+      if (isHost) {
+        inviteLink.value = location.origin + location.pathname + '?room=' + id;
+        inviteBox.hidden = false;
+        recovery.hidden = true;
+        updateStatus();
+      } else {
+        conn = peer.connect(roomId);
+        setupConn();
+        updateStatus();
+      }
     });
+
+    if (isHost) {
+      peer.on('connection', function (c) {
+        conn = c;
+        setupConn();
+      });
+    }
+
+    peer.on('error', onPeerError);
   }
 
-  peer.on('error', function (err) {
+  function onPeerError(err) {
     const type = err && err.type;
     connected = false;
     document.body.classList.remove('is-live');
@@ -868,8 +884,16 @@
                    takeoverTarget(), 'Host this room yourself',
                    'The link you opened keeps working');
     } else if (type === 'unavailable-id') {
-      statusEl.textContent = 'That room is already taken';
-      offerRestart('Someone else is already hosting that room',
+      if (hostId && claimRetries < MAX_CLAIM_RETRIES) {
+        claimRetries++;
+        statusEl.textContent = 'Reclaiming the room';
+        recovery.hidden = true;
+        try { peer.destroy(); } catch (e) {}
+        setTimeout(startPeer, 1500);
+        return;
+      }
+      statusEl.textContent = 'That room is still in use';
+      offerRestart('Someone is still hosting that room',
                    location.pathname, 'Start a fresh toss');
     } else {
       statusEl.textContent = 'Connection error';
@@ -877,7 +901,9 @@
                    location.pathname, 'Start a fresh toss');
     }
     renderSideUI();
-  });
+  }
+
+  startPeer();
 
   const carried = readStoredName();
   if (carried) {

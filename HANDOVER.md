@@ -69,15 +69,29 @@ thing to do.
   `offerRestart(note, target, label, sub)` now reveals a panel whose button
   navigates to `?host=<the dead room id>`, so the page returns as a host that has
   **claimed that same id** — the link already sitting in someone's chat keeps
-  working, and whoever else holds it can still join. Verified by asserting the
-  regenerated invite link is byte-identical to the original.
+  working, and whoever else holds it can still join. Verified against the real
+  broker: the regenerated invite link is byte-identical to the original.
+  **The claim only succeeds if the broker has actually released the id.** It
+  refuses with `unavailable-id` while the id is still registered, which is the
+  case whenever the original host is still alive — so a *dropped connection* is
+  NOT a takeover situation. That is why `conn.on('close')` offers **"Try to
+  rejoin"** (reload the same `?room=` link) rather than a takeover: if the host
+  is still there you reconnect, and only if they have truly gone does the empty-
+  room path then offer the takeover. `peer-unavailable` means the id is already
+  unregistered, so a takeover from *that* state is the case that reliably works.
+  An id frees roughly a second after its peer goes away, so a claim refused by a
+  narrow race is retried up to `MAX_CLAIM_RETRIES` times at 1.5s intervals before
+  giving up and offering a fresh toss.
   The typed name rides across that reload in `sessionStorage` under
   `callit:name` and is prefilled on load (wrapped in try/catch — it throws in
   some privacy modes and is unavailable on `file://`, so test this over http,
   not a local file).
-  If the claim fails because someone genuinely holds that id, PeerJS raises
-  `unavailable-id`; that case offers a *fresh* toss at a bare pathname instead,
-  so a takeover cannot loop trying to claim an id it will never get.
+  If the id is still held after those retries, the panel offers a *fresh* toss
+  at a bare pathname, so a takeover cannot loop forever on an id it will not get.
+  **Testing note:** a stubbed broker that honours every requested id proves
+  nothing about any of this — the first version of this feature passed such a
+  stub and still failed in the browser. Exercise id claiming against the real
+  broker, or not at all.
   It is offered on any fatal peer error, and to a **guest** whose host leaves.
   Deliberately not to a host whose guest leaves: that host's link is still live
   and someone can still join it, so re-hosting would needlessly invalidate a
@@ -205,9 +219,12 @@ deterministic. This is how the side-switch preview, the lock-on-flip and the
 winner highlight were verified; it is worth rebuilding if you touch that logic.
 
 ## Known gaps / suggested next steps
-1. **Live two-device test** — deploy to GitHub Pages, open on two separate
-   devices/networks, confirm connection, name sync, side-call, flip animation,
-   and score all behave correctly. This hasn't happened yet.
+1. ~~**Live two-device test**~~ — **done.** Two real browser tabs against the
+   public PeerJS broker: connection, name sync, random side assignment, a flip,
+   and score agreement all verified. Both sides reported the same result and the
+   same history, each score shown from its own perspective. Sides locked on both
+   ends after the flip. The remaining untested dimension is two *separate
+   networks* (NAT traversal), which one machine cannot exercise.
 2. **Simultaneous toggle** — if both players click at the same instant the two
    `call` messages cross and the sides could briefly disagree. Not handled; a
    host-authoritative assignment would fix it if it ever matters.
