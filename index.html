@@ -7,7 +7,7 @@
 <meta name="description" content="Two people, two computers, one coin flip. Peer-to-peer, no backend.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400..900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/peerjs@1/dist/peerjs.min.js"></script>
 <style>
   :root {
@@ -22,7 +22,7 @@
     --rule:      rgba(201,162,77,.20);
     --seam:      rgba(201,162,77,.30);
     --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
-    --display: 'Bodoni Moda', Didot, 'Times New Roman', Georgia, serif;
+    --display: 'Cinzel', 'Trajan Pro', 'Times New Roman', Georgia, serif;
   }
 
   * { box-sizing: border-box; }
@@ -61,11 +61,12 @@
     font-weight: 700;
     font-size: clamp(42px, 13vw, 60px);
     line-height: 1;
-    letter-spacing: .15em;
+    letter-spacing: .17em;
+    word-spacing: .14em;
     text-transform: uppercase;
     text-align: center;
     margin: 12px 0 0;
-    text-indent: .15em;
+    text-indent: .17em;
     color: var(--brass-hi);
     text-shadow: 0 2px 0 rgba(0,0,0,.45);
   }
@@ -225,6 +226,11 @@
     box-shadow: 0 16px 34px rgba(0,0,0,.6), 0 0 0 1px rgba(0,0,0,.45);
   }
   .coin__face svg { width: 100%; height: 100%; display: block; border-radius: 50%; }
+  .coin-name, .coin-motto {
+    font-family: var(--display);
+    font-weight: 600;
+    text-transform: uppercase;
+  }
   .coin__face--back { transform: rotateY(180deg); }
 
   .cast-shadow {
@@ -303,7 +309,7 @@
 <div class="app">
   <div class="panel">
 
-    <div class="eyebrow">Two parties · one toss</div>
+    <div class="eyebrow">Alea iacta est</div>
     <h1>Call It</h1>
     <div class="rule"><i></i></div>
     <div class="status" id="status">Starting up</div>
@@ -338,86 +344,128 @@
         <div class="coin-stage">
           <div class="coin" id="coin">
             <div class="coin__face coin__face--front">
-          <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Heads">
-            <defs><radialGradient id="metalA" cx="33%" cy="24%" r="86%">
-                <stop offset="0%"   stop-color="#fceecb"/>
-                <stop offset="22%"  stop-color="#eed69d"/>
-                <stop offset="52%"  stop-color="#c9a25a"/>
-                <stop offset="78%"  stop-color="#93702f"/>
-                <stop offset="100%" stop-color="#5b431c"/>
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sun face">
+            <defs>
+              <radialGradient id="metalA" cx="33%" cy="23%" r="88%">
+                <stop offset="0%"   stop-color="#fbecc6"/>
+                <stop offset="16%"  stop-color="#e6cb92"/>
+                <stop offset="40%"  stop-color="#b98f47"/>
+                <stop offset="64%"  stop-color="#856125"/>
+                <stop offset="85%"  stop-color="#4a3616"/>
+                <stop offset="100%" stop-color="#241a0b"/>
               </radialGradient>
-              <linearGradient id="sheenA" x1="0" y1="0" x2="0.7" y2="1">
-                <stop offset="0%"   stop-color="#fff6dc" stop-opacity=".55"/>
-                <stop offset="38%"  stop-color="#fff6dc" stop-opacity="0"/>
-                <stop offset="72%"  stop-color="#3a2a10" stop-opacity="0"/>
-                <stop offset="100%" stop-color="#3a2a10" stop-opacity=".35"/>
+              <linearGradient id="sheenA" x1="0" y1="0" x2=".7" y2="1">
+                <stop offset="0%"   stop-color="#fff4d6" stop-opacity=".45"/>
+                <stop offset="34%"  stop-color="#fff4d6" stop-opacity="0"/>
+                <stop offset="70%"  stop-color="#241a08" stop-opacity="0"/>
+                <stop offset="100%" stop-color="#241a08" stop-opacity=".42"/>
               </linearGradient>
+              <radialGradient id="patA1" cx="20%" cy="78%" r="26%">
+                <stop offset="0%" stop-color="#4d8f76" stop-opacity=".20"/>
+                <stop offset="100%" stop-color="#4d8f76" stop-opacity="0"/>
+              </radialGradient>
+              <radialGradient id="patA2" cx="84%" cy="26%" r="20%">
+                <stop offset="0%" stop-color="#3f7f83" stop-opacity=".15"/>
+                <stop offset="100%" stop-color="#3f7f83" stop-opacity="0"/>
+              </radialGradient>
+              <radialGradient id="patA3" cx="62%" cy="92%" r="18%">
+                <stop offset="0%" stop-color="#6b9a54" stop-opacity=".13"/>
+                <stop offset="100%" stop-color="#6b9a54" stop-opacity="0"/>
+              </radialGradient>
+              <clipPath id="discA"><circle cx="100" cy="100" r="96"/></clipPath>
               <filter id="struckA">
-                <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" seed="7" result="grain"/>
-                <feDisplacementMap in="SourceGraphic" in2="grain" scale="1.1" xChannelSelector="R" yChannelSelector="G"/>
+                <feTurbulence type="fractalNoise" baseFrequency=".82" numOctaves="3" seed="7" result="g"/>
+                <feDisplacementMap in="SourceGraphic" in2="g" scale="1.5" xChannelSelector="R" yChannelSelector="G"/>
               </filter>
-              <path id="leaf" d="M 0,0 Q 6.2,-7.5 0,-16.5 Q -6.2,-7.5 0,0 Z"/>
             </defs>
             <g filter="url(#struckA)">
             <circle cx="100" cy="100" r="96" fill="url(#metalA)"/>
-            <circle cx="100" cy="100" r="96" fill="url(#sheenA)"/>
-            <circle cx="100" cy="100" r="90.5" fill="none" stroke="#4a3717" stroke-width="4.5"
-                    stroke-dasharray="0 7.6" stroke-linecap="round" opacity=".55"/>
-            <circle cx="100" cy="100" r="83" fill="none" stroke="#4a3717" stroke-width="1.4" opacity=".38"/>
-            <circle cx="100" cy="100" r="80.5" fill="none" stroke="#fbe9bd" stroke-width=".9" opacity=".28"/>
-            <g transform="translate(0,1.5)" fill="#4a3717" opacity=".55"><path d="M 124.54,95.23 L 162.00,100.00 L 124.54,104.77 Z M 124.78,103.27 L 145.40,112.16 L 123.10,109.56 Z M 123.64,108.14 L 153.69,131.00 L 118.87,116.40 Z M 119.83,115.23 L 133.23,133.23 L 115.23,119.83 Z M 116.40,118.87 L 131.00,153.69 L 108.14,123.64 Z M 109.56,123.10 L 112.16,145.40 L 103.27,124.78 Z M 104.77,124.54 L 100.00,162.00 L 95.23,124.54 Z M 96.73,124.78 L 87.84,145.40 L 90.44,123.10 Z M 91.86,123.64 L 69.00,153.69 L 83.60,118.87 Z M 84.77,119.83 L 66.77,133.23 L 80.17,115.23 Z M 81.13,116.40 L 46.31,131.00 L 76.36,108.14 Z M 76.90,109.56 L 54.60,112.16 L 75.22,103.27 Z M 75.46,104.77 L 38.00,100.00 L 75.46,95.23 Z M 75.22,96.73 L 54.60,87.84 L 76.90,90.44 Z M 76.36,91.86 L 46.31,69.00 L 81.13,83.60 Z M 80.17,84.77 L 66.77,66.77 L 84.77,80.17 Z M 83.60,81.13 L 69.00,46.31 L 91.86,76.36 Z M 90.44,76.90 L 87.84,54.60 L 96.73,75.22 Z M 95.23,75.46 L 100.00,38.00 L 104.77,75.46 Z M 103.27,75.22 L 112.16,54.60 L 109.56,76.90 Z M 108.14,76.36 L 131.00,46.31 L 116.40,81.13 Z M 115.23,80.17 L 133.23,66.77 L 119.83,84.77 Z M 118.87,83.60 L 153.69,69.00 L 123.64,91.86 Z M 123.10,90.44 L 145.40,87.84 L 124.78,96.73 Z"/></g>
-            <g transform="translate(0,-1.2)" fill="#fdf1ce" opacity=".42"><path d="M 124.54,95.23 L 162.00,100.00 L 124.54,104.77 Z M 124.78,103.27 L 145.40,112.16 L 123.10,109.56 Z M 123.64,108.14 L 153.69,131.00 L 118.87,116.40 Z M 119.83,115.23 L 133.23,133.23 L 115.23,119.83 Z M 116.40,118.87 L 131.00,153.69 L 108.14,123.64 Z M 109.56,123.10 L 112.16,145.40 L 103.27,124.78 Z M 104.77,124.54 L 100.00,162.00 L 95.23,124.54 Z M 96.73,124.78 L 87.84,145.40 L 90.44,123.10 Z M 91.86,123.64 L 69.00,153.69 L 83.60,118.87 Z M 84.77,119.83 L 66.77,133.23 L 80.17,115.23 Z M 81.13,116.40 L 46.31,131.00 L 76.36,108.14 Z M 76.90,109.56 L 54.60,112.16 L 75.22,103.27 Z M 75.46,104.77 L 38.00,100.00 L 75.46,95.23 Z M 75.22,96.73 L 54.60,87.84 L 76.90,90.44 Z M 76.36,91.86 L 46.31,69.00 L 81.13,83.60 Z M 80.17,84.77 L 66.77,66.77 L 84.77,80.17 Z M 83.60,81.13 L 69.00,46.31 L 91.86,76.36 Z M 90.44,76.90 L 87.84,54.60 L 96.73,75.22 Z M 95.23,75.46 L 100.00,38.00 L 104.77,75.46 Z M 103.27,75.22 L 112.16,54.60 L 109.56,76.90 Z M 108.14,76.36 L 131.00,46.31 L 116.40,81.13 Z M 115.23,80.17 L 133.23,66.77 L 119.83,84.77 Z M 118.87,83.60 L 153.69,69.00 L 123.64,91.86 Z M 123.10,90.44 L 145.40,87.84 L 124.78,96.73 Z"/></g>
-            <g fill="#5d461d" opacity=".93"><path d="M 124.54,95.23 L 162.00,100.00 L 124.54,104.77 Z M 124.78,103.27 L 145.40,112.16 L 123.10,109.56 Z M 123.64,108.14 L 153.69,131.00 L 118.87,116.40 Z M 119.83,115.23 L 133.23,133.23 L 115.23,119.83 Z M 116.40,118.87 L 131.00,153.69 L 108.14,123.64 Z M 109.56,123.10 L 112.16,145.40 L 103.27,124.78 Z M 104.77,124.54 L 100.00,162.00 L 95.23,124.54 Z M 96.73,124.78 L 87.84,145.40 L 90.44,123.10 Z M 91.86,123.64 L 69.00,153.69 L 83.60,118.87 Z M 84.77,119.83 L 66.77,133.23 L 80.17,115.23 Z M 81.13,116.40 L 46.31,131.00 L 76.36,108.14 Z M 76.90,109.56 L 54.60,112.16 L 75.22,103.27 Z M 75.46,104.77 L 38.00,100.00 L 75.46,95.23 Z M 75.22,96.73 L 54.60,87.84 L 76.90,90.44 Z M 76.36,91.86 L 46.31,69.00 L 81.13,83.60 Z M 80.17,84.77 L 66.77,66.77 L 84.77,80.17 Z M 83.60,81.13 L 69.00,46.31 L 91.86,76.36 Z M 90.44,76.90 L 87.84,54.60 L 96.73,75.22 Z M 95.23,75.46 L 100.00,38.00 L 104.77,75.46 Z M 103.27,75.22 L 112.16,54.60 L 109.56,76.90 Z M 108.14,76.36 L 131.00,46.31 L 116.40,81.13 Z M 115.23,80.17 L 133.23,66.77 L 119.83,84.77 Z M 118.87,83.60 L 153.69,69.00 L 123.64,91.86 Z M 123.10,90.44 L 145.40,87.84 L 124.78,96.73 Z"/></g>
-            <circle cx="100" cy="100" r="23.5" fill="url(#metalA)"/>
-            <circle cx="100" cy="100" r="23.5" fill="none" stroke="#4a3717" stroke-width="1.6" opacity=".6"/>
-            <g transform="translate(0,1.5)" fill="#4a3717" opacity=".55"><path d="M 100,82 L 104.2,96.2 L 118,100 L 104.2,103.8 L 100,118 L 95.8,103.8 L 82,100 L 95.8,96.2 Z"/></g>
-            <g transform="translate(0,-1.2)" fill="#fdf1ce" opacity=".42"><path d="M 100,82 L 104.2,96.2 L 118,100 L 104.2,103.8 L 100,118 L 95.8,103.8 L 82,100 L 95.8,96.2 Z"/></g>
-            <g fill="#5d461d" opacity=".93"><path d="M 100,82 L 104.2,96.2 L 118,100 L 104.2,103.8 L 100,118 L 95.8,103.8 L 82,100 L 95.8,96.2 Z"/></g>
-            <path id="topA" d="M 30.5,74.7 A 74,74 0 0 1 169.5,74.7" fill="none"/>
-            <path id="botA" d="M 34.2,123.9 A 70,70 0 0 0 165.8,123.9" fill="none"/>
-            <g font-family="'Bodoni Moda', Didot, Georgia, serif" font-weight="600">
-              <text font-size="19" letter-spacing="5.5" fill="#57411b" opacity=".92">
-                <textPath href="#topA" startOffset="50%" text-anchor="middle">HEADS</textPath>
-              </text>
-              <text font-size="19" letter-spacing="5.5" fill="#fae7ba" opacity=".22" transform="translate(0,-1.1)">
-                <textPath href="#topA" startOffset="50%" text-anchor="middle">HEADS</textPath>
-              </text>
-              <text font-size="10.5" letter-spacing="4" fill="#57411b" opacity=".7">
-                <textPath href="#botA" startOffset="50%" text-anchor="middle">· MMXXVI ·</textPath>
-              </text>
+            <g clip-path="url(#discA)">
+              <rect x="0" y="0" width="200" height="200" fill="url(#patA1)"/>
+              <rect x="0" y="0" width="200" height="200" fill="url(#patA2)"/>
+              <rect x="0" y="0" width="200" height="200" fill="url(#patA3)"/>
             </g>
+            <circle cx="100" cy="100" r="96" fill="url(#sheenA)"/>
+            <circle cx="100" cy="100" r="90.5" fill="none" stroke="#3b2c12" stroke-width="4.6"
+                    stroke-dasharray="0 7.6" stroke-linecap="round" opacity=".6"/>
+            <circle cx="100" cy="100" r="83" fill="none" stroke="#3b2c12" stroke-width="1.4" opacity=".42"/>
+            <circle cx="100" cy="100" r="80.5" fill="none" stroke="#f7e2b4" stroke-width=".9" opacity=".22"/>
+            <g transform="translate(0,1.5)" fill="#3b2c12" opacity=".6"><path d="M 124.54,95.23 L 162.00,100.00 L 124.54,104.77 Z M 124.78,103.27 L 145.40,112.16 L 123.10,109.56 Z M 123.64,108.14 L 153.69,131.00 L 118.87,116.40 Z M 119.83,115.23 L 133.23,133.23 L 115.23,119.83 Z M 116.40,118.87 L 131.00,153.69 L 108.14,123.64 Z M 109.56,123.10 L 112.16,145.40 L 103.27,124.78 Z M 104.77,124.54 L 100.00,162.00 L 95.23,124.54 Z M 96.73,124.78 L 87.84,145.40 L 90.44,123.10 Z M 91.86,123.64 L 69.00,153.69 L 83.60,118.87 Z M 84.77,119.83 L 66.77,133.23 L 80.17,115.23 Z M 81.13,116.40 L 46.31,131.00 L 76.36,108.14 Z M 76.90,109.56 L 54.60,112.16 L 75.22,103.27 Z M 75.46,104.77 L 38.00,100.00 L 75.46,95.23 Z M 75.22,96.73 L 54.60,87.84 L 76.90,90.44 Z M 76.36,91.86 L 46.31,69.00 L 81.13,83.60 Z M 80.17,84.77 L 66.77,66.77 L 84.77,80.17 Z M 83.60,81.13 L 69.00,46.31 L 91.86,76.36 Z M 90.44,76.90 L 87.84,54.60 L 96.73,75.22 Z M 95.23,75.46 L 100.00,38.00 L 104.77,75.46 Z M 103.27,75.22 L 112.16,54.60 L 109.56,76.90 Z M 108.14,76.36 L 131.00,46.31 L 116.40,81.13 Z M 115.23,80.17 L 133.23,66.77 L 119.83,84.77 Z M 118.87,83.60 L 153.69,69.00 L 123.64,91.86 Z M 123.10,90.44 L 145.40,87.84 L 124.78,96.73 Z"/></g>
+            <g transform="translate(0,-1.2)" fill="#fbedc6" opacity=".38"><path d="M 124.54,95.23 L 162.00,100.00 L 124.54,104.77 Z M 124.78,103.27 L 145.40,112.16 L 123.10,109.56 Z M 123.64,108.14 L 153.69,131.00 L 118.87,116.40 Z M 119.83,115.23 L 133.23,133.23 L 115.23,119.83 Z M 116.40,118.87 L 131.00,153.69 L 108.14,123.64 Z M 109.56,123.10 L 112.16,145.40 L 103.27,124.78 Z M 104.77,124.54 L 100.00,162.00 L 95.23,124.54 Z M 96.73,124.78 L 87.84,145.40 L 90.44,123.10 Z M 91.86,123.64 L 69.00,153.69 L 83.60,118.87 Z M 84.77,119.83 L 66.77,133.23 L 80.17,115.23 Z M 81.13,116.40 L 46.31,131.00 L 76.36,108.14 Z M 76.90,109.56 L 54.60,112.16 L 75.22,103.27 Z M 75.46,104.77 L 38.00,100.00 L 75.46,95.23 Z M 75.22,96.73 L 54.60,87.84 L 76.90,90.44 Z M 76.36,91.86 L 46.31,69.00 L 81.13,83.60 Z M 80.17,84.77 L 66.77,66.77 L 84.77,80.17 Z M 83.60,81.13 L 69.00,46.31 L 91.86,76.36 Z M 90.44,76.90 L 87.84,54.60 L 96.73,75.22 Z M 95.23,75.46 L 100.00,38.00 L 104.77,75.46 Z M 103.27,75.22 L 112.16,54.60 L 109.56,76.90 Z M 108.14,76.36 L 131.00,46.31 L 116.40,81.13 Z M 115.23,80.17 L 133.23,66.77 L 119.83,84.77 Z M 118.87,83.60 L 153.69,69.00 L 123.64,91.86 Z M 123.10,90.44 L 145.40,87.84 L 124.78,96.73 Z"/></g>
+            <g fill="#523d18" opacity=".94"><path d="M 124.54,95.23 L 162.00,100.00 L 124.54,104.77 Z M 124.78,103.27 L 145.40,112.16 L 123.10,109.56 Z M 123.64,108.14 L 153.69,131.00 L 118.87,116.40 Z M 119.83,115.23 L 133.23,133.23 L 115.23,119.83 Z M 116.40,118.87 L 131.00,153.69 L 108.14,123.64 Z M 109.56,123.10 L 112.16,145.40 L 103.27,124.78 Z M 104.77,124.54 L 100.00,162.00 L 95.23,124.54 Z M 96.73,124.78 L 87.84,145.40 L 90.44,123.10 Z M 91.86,123.64 L 69.00,153.69 L 83.60,118.87 Z M 84.77,119.83 L 66.77,133.23 L 80.17,115.23 Z M 81.13,116.40 L 46.31,131.00 L 76.36,108.14 Z M 76.90,109.56 L 54.60,112.16 L 75.22,103.27 Z M 75.46,104.77 L 38.00,100.00 L 75.46,95.23 Z M 75.22,96.73 L 54.60,87.84 L 76.90,90.44 Z M 76.36,91.86 L 46.31,69.00 L 81.13,83.60 Z M 80.17,84.77 L 66.77,66.77 L 84.77,80.17 Z M 83.60,81.13 L 69.00,46.31 L 91.86,76.36 Z M 90.44,76.90 L 87.84,54.60 L 96.73,75.22 Z M 95.23,75.46 L 100.00,38.00 L 104.77,75.46 Z M 103.27,75.22 L 112.16,54.60 L 109.56,76.90 Z M 108.14,76.36 L 131.00,46.31 L 116.40,81.13 Z M 115.23,80.17 L 133.23,66.77 L 119.83,84.77 Z M 118.87,83.60 L 153.69,69.00 L 123.64,91.86 Z M 123.10,90.44 L 145.40,87.84 L 124.78,96.73 Z"/></g>
+            <circle cx="100" cy="100" r="23.5" fill="url(#metalA)"/>
+            <circle cx="100" cy="100" r="23.5" fill="none" stroke="#3b2c12" stroke-width="1.6" opacity=".62"/>
+            <g transform="translate(0,1.5)" fill="#3b2c12" opacity=".6"><path d="M 100,82 L 104.2,96.2 L 118,100 L 104.2,103.8 L 100,118 L 95.8,103.8 L 82,100 L 95.8,96.2 Z"/></g>
+            <g transform="translate(0,-1.2)" fill="#fbedc6" opacity=".38"><path d="M 100,82 L 104.2,96.2 L 118,100 L 104.2,103.8 L 100,118 L 95.8,103.8 L 82,100 L 95.8,96.2 Z"/></g>
+            <g fill="#523d18" opacity=".94"><path d="M 100,82 L 104.2,96.2 L 118,100 L 104.2,103.8 L 100,118 L 95.8,103.8 L 82,100 L 95.8,96.2 Z"/></g>
+            <g transform="translate(0,1.5)" fill="#3b2c12" opacity=".6">M 22.50,94.60 L 23.63,98.04 L 27.18,97.30 L 24.77,100.00 L 27.18,102.70 L 23.63,101.96 L 22.50,105.40 L 21.37,101.96 L 17.82,102.70 L 20.23,100.00 L 17.82,97.30 L 21.37,98.04 ZM 177.50,94.60 L 178.63,98.04 L 182.18,97.30 L 179.77,100.00 L 182.18,102.70 L 178.63,101.96 L 177.50,105.40 L 176.37,101.96 L 172.82,102.70 L 175.23,100.00 L 172.82,97.30 L 176.37,98.04 Z</g>
+            <g transform="translate(0,-1.2)" fill="#fbedc6" opacity=".38">M 22.50,94.60 L 23.63,98.04 L 27.18,97.30 L 24.77,100.00 L 27.18,102.70 L 23.63,101.96 L 22.50,105.40 L 21.37,101.96 L 17.82,102.70 L 20.23,100.00 L 17.82,97.30 L 21.37,98.04 ZM 177.50,94.60 L 178.63,98.04 L 182.18,97.30 L 179.77,100.00 L 182.18,102.70 L 178.63,101.96 L 177.50,105.40 L 176.37,101.96 L 172.82,102.70 L 175.23,100.00 L 172.82,97.30 L 176.37,98.04 Z</g>
+            <g fill="#523d18" opacity=".94">M 22.50,94.60 L 23.63,98.04 L 27.18,97.30 L 24.77,100.00 L 27.18,102.70 L 23.63,101.96 L 22.50,105.40 L 21.37,101.96 L 17.82,102.70 L 20.23,100.00 L 17.82,97.30 L 21.37,98.04 ZM 177.50,94.60 L 178.63,98.04 L 182.18,97.30 L 179.77,100.00 L 182.18,102.70 L 178.63,101.96 L 177.50,105.40 L 176.37,101.96 L 172.82,102.70 L 175.23,100.00 L 172.82,97.30 L 176.37,98.04 Z</g>
+            <path id="topA" d="M 37.98,77.43 A 66,66 0 0 1 162.02,77.43" fill="none"/>
+            <path id="botA" d="M 34.2,123.9 A 70,70 0 0 0 165.8,123.9" fill="none"/>
+            <text class="coin-name coin-name--light" id="nameALight" x="0" y="-1.1"
+                  font-size="18" letter-spacing="4.4" fill="#fbedc6" opacity=".34" transform="translate(0,-1.1)">
+              <textPath href="#topA" startOffset="50%" text-anchor="middle"></textPath>
+            </text>
+            <text class="coin-name" id="nameA"
+                  font-size="18" letter-spacing="4.4" fill="#4a3714" opacity=".95">
+              <textPath href="#topA" startOffset="50%" text-anchor="middle"></textPath>
+            </text>
+            <text class="coin-motto" font-size="10.5" letter-spacing="4.5" fill="#43310f" opacity=".8">
+              <textPath href="#botA" startOffset="50%" text-anchor="middle">· FORTVNA ·</textPath>
+            </text>
             </g>
           </svg>
             </div>
             <div class="coin__face coin__face--back">
-          <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Tails">
-            <defs><radialGradient id="metalB" cx="33%" cy="24%" r="86%">
-                <stop offset="0%"   stop-color="#fceecb"/>
-                <stop offset="22%"  stop-color="#eed69d"/>
-                <stop offset="52%"  stop-color="#c9a25a"/>
-                <stop offset="78%"  stop-color="#93702f"/>
-                <stop offset="100%" stop-color="#5b431c"/>
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Wreath face">
+            <defs>
+              <radialGradient id="metalB" cx="33%" cy="23%" r="88%">
+                <stop offset="0%"   stop-color="#fbecc6"/>
+                <stop offset="16%"  stop-color="#e6cb92"/>
+                <stop offset="40%"  stop-color="#b98f47"/>
+                <stop offset="64%"  stop-color="#856125"/>
+                <stop offset="85%"  stop-color="#4a3616"/>
+                <stop offset="100%" stop-color="#241a0b"/>
               </radialGradient>
-              <linearGradient id="sheenB" x1="0" y1="0" x2="0.7" y2="1">
-                <stop offset="0%"   stop-color="#fff6dc" stop-opacity=".55"/>
-                <stop offset="38%"  stop-color="#fff6dc" stop-opacity="0"/>
-                <stop offset="72%"  stop-color="#3a2a10" stop-opacity="0"/>
-                <stop offset="100%" stop-color="#3a2a10" stop-opacity=".35"/>
+              <linearGradient id="sheenB" x1="0" y1="0" x2=".7" y2="1">
+                <stop offset="0%"   stop-color="#fff4d6" stop-opacity=".45"/>
+                <stop offset="34%"  stop-color="#fff4d6" stop-opacity="0"/>
+                <stop offset="70%"  stop-color="#241a08" stop-opacity="0"/>
+                <stop offset="100%" stop-color="#241a08" stop-opacity=".42"/>
               </linearGradient>
+              <radialGradient id="patB1" cx="20%" cy="78%" r="26%">
+                <stop offset="0%" stop-color="#4d8f76" stop-opacity=".20"/>
+                <stop offset="100%" stop-color="#4d8f76" stop-opacity="0"/>
+              </radialGradient>
+              <radialGradient id="patB2" cx="84%" cy="26%" r="20%">
+                <stop offset="0%" stop-color="#3f7f83" stop-opacity=".15"/>
+                <stop offset="100%" stop-color="#3f7f83" stop-opacity="0"/>
+              </radialGradient>
+              <radialGradient id="patB3" cx="62%" cy="92%" r="18%">
+                <stop offset="0%" stop-color="#6b9a54" stop-opacity=".13"/>
+                <stop offset="100%" stop-color="#6b9a54" stop-opacity="0"/>
+              </radialGradient>
+              <clipPath id="discB"><circle cx="100" cy="100" r="96"/></clipPath>
               <filter id="struckB">
-                <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" seed="19" result="grain"/>
-                <feDisplacementMap in="SourceGraphic" in2="grain" scale="1.1" xChannelSelector="R" yChannelSelector="G"/>
+                <feTurbulence type="fractalNoise" baseFrequency=".82" numOctaves="3" seed="19" result="g"/>
+                <feDisplacementMap in="SourceGraphic" in2="g" scale="1.5" xChannelSelector="R" yChannelSelector="G"/>
               </filter>
               <path id="leaf" d="M 0,0 Q 6.2,-7.5 0,-16.5 Q -6.2,-7.5 0,0 Z"/>
             </defs>
             <g filter="url(#struckB)">
             <circle cx="100" cy="100" r="96" fill="url(#metalB)"/>
+            <g clip-path="url(#discB)">
+              <rect x="0" y="0" width="200" height="200" fill="url(#patB1)"/>
+              <rect x="0" y="0" width="200" height="200" fill="url(#patB2)"/>
+              <rect x="0" y="0" width="200" height="200" fill="url(#patB3)"/>
+            </g>
             <circle cx="100" cy="100" r="96" fill="url(#sheenB)"/>
-            <circle cx="100" cy="100" r="90.5" fill="none" stroke="#4a3717" stroke-width="4.5"
-                    stroke-dasharray="0 7.6" stroke-linecap="round" opacity=".55"/>
-            <circle cx="100" cy="100" r="83" fill="none" stroke="#4a3717" stroke-width="1.4" opacity=".38"/>
-            <circle cx="100" cy="100" r="80.5" fill="none" stroke="#fbe9bd" stroke-width=".9" opacity=".28"/>
-            <g transform="translate(0,1.5)" fill="#4a3717" opacity=".55"><use href="#leaf" transform="translate(90.97,151.21) rotate(298.00) scale(1.05)"/>
+            <circle cx="100" cy="100" r="90.5" fill="none" stroke="#3b2c12" stroke-width="4.6"
+                    stroke-dasharray="0 7.6" stroke-linecap="round" opacity=".6"/>
+            <circle cx="100" cy="100" r="83" fill="none" stroke="#3b2c12" stroke-width="1.4" opacity=".42"/>
+            <circle cx="100" cy="100" r="80.5" fill="none" stroke="#f7e2b4" stroke-width=".9" opacity=".22"/>
+            <g transform="translate(0,1.5)" fill="#3b2c12" opacity=".6"><use href="#leaf" transform="translate(90.97,151.21) rotate(298.00) scale(1.05)"/>
             <use href="#leaf" transform="translate(77.67,146.96) rotate(313.43) scale(0.99)"/>
             <use href="#leaf" transform="translate(65.98,139.33) rotate(328.86) scale(0.94)"/>
             <use href="#leaf" transform="translate(56.75,128.86) rotate(344.29) scale(0.88)"/>
@@ -442,7 +490,7 @@
             <circle cx="58.81" cy="105.06" r="1.90"/>
             <circle cx="141.19" cy="105.06" r="1.90"/>
             <path d="M 92,150.5 Q 100,145.5 108,150.5 Q 100,154.5 92,150.5 Z"/></g>
-            <g transform="translate(0,-1.2)" fill="#fdf1ce" opacity=".42"><use href="#leaf" transform="translate(90.97,151.21) rotate(298.00) scale(1.05)"/>
+            <g transform="translate(0,-1.2)" fill="#fbedc6" opacity=".38"><use href="#leaf" transform="translate(90.97,151.21) rotate(298.00) scale(1.05)"/>
             <use href="#leaf" transform="translate(77.67,146.96) rotate(313.43) scale(0.99)"/>
             <use href="#leaf" transform="translate(65.98,139.33) rotate(328.86) scale(0.94)"/>
             <use href="#leaf" transform="translate(56.75,128.86) rotate(344.29) scale(0.88)"/>
@@ -467,7 +515,7 @@
             <circle cx="58.81" cy="105.06" r="1.90"/>
             <circle cx="141.19" cy="105.06" r="1.90"/>
             <path d="M 92,150.5 Q 100,145.5 108,150.5 Q 100,154.5 92,150.5 Z"/></g>
-            <g fill="#5d461d" opacity=".93"><use href="#leaf" transform="translate(90.97,151.21) rotate(298.00) scale(1.05)"/>
+            <g fill="#523d18" opacity=".94"><use href="#leaf" transform="translate(90.97,151.21) rotate(298.00) scale(1.05)"/>
             <use href="#leaf" transform="translate(77.67,146.96) rotate(313.43) scale(0.99)"/>
             <use href="#leaf" transform="translate(65.98,139.33) rotate(328.86) scale(0.94)"/>
             <use href="#leaf" transform="translate(56.75,128.86) rotate(344.29) scale(0.88)"/>
@@ -492,23 +540,27 @@
             <circle cx="58.81" cy="105.06" r="1.90"/>
             <circle cx="141.19" cy="105.06" r="1.90"/>
             <path d="M 92,150.5 Q 100,145.5 108,150.5 Q 100,154.5 92,150.5 Z"/></g>
-            <g font-family="'Bodoni Moda', Didot, Georgia, serif" font-weight="700" text-anchor="middle">
-              <text x="100" y="106.5" font-size="26" letter-spacing="2" fill="#4a3717" opacity=".5" transform="translate(0,1.4)">SPQR</text>
-              <text x="100" y="106.5" font-size="26" letter-spacing="2" fill="#5d461d">SPQR</text>
-            </g>
-            <path id="topB" d="M 30.5,74.7 A 74,74 0 0 1 169.5,74.7" fill="none"/>
+            <g transform="translate(0,1.5)" fill="#3b2c12" opacity=".6"><path d="M 100,72.7 L 104.42,90.38 L 100,86.52 L 95.58,90.38 Z M 127.3,100 L 109.62,104.42 L 112.48,100 L 109.62,95.58 Z M 100,127.3 L 95.58,109.62 L 100,112.48 L 104.42,109.62 Z M 72.7,100 L 90.38,95.58 L 86.52,100 L 90.38,104.42 Z"/></g>
+            <g transform="translate(0,-1.2)" fill="#fbedc6" opacity=".38"><path d="M 100,72.7 L 104.42,90.38 L 100,86.52 L 95.58,90.38 Z M 127.3,100 L 109.62,104.42 L 112.48,100 L 109.62,95.58 Z M 100,127.3 L 95.58,109.62 L 100,112.48 L 104.42,109.62 Z M 72.7,100 L 90.38,95.58 L 86.52,100 L 90.38,104.42 Z"/></g>
+            <g fill="#523d18" opacity=".94"><path d="M 100,72.7 L 104.42,90.38 L 100,86.52 L 95.58,90.38 Z M 127.3,100 L 109.62,104.42 L 112.48,100 L 109.62,95.58 Z M 100,127.3 L 95.58,109.62 L 100,112.48 L 104.42,109.62 Z M 72.7,100 L 90.38,95.58 L 86.52,100 L 90.38,104.42 Z"/></g>
+            <circle cx="100" cy="100" r="19.5" fill="none" stroke="#4a3714" stroke-width="1.3" opacity=".55"/>
+            <circle cx="100" cy="100" r="19.5" fill="none" stroke="#fbedc6" stroke-width=".7" opacity=".2" transform="translate(0,-1)"/>
+            <g transform="translate(0,1.5)" fill="#3b2c12" opacity=".6">M 22.50,94.60 L 23.63,98.04 L 27.18,97.30 L 24.77,100.00 L 27.18,102.70 L 23.63,101.96 L 22.50,105.40 L 21.37,101.96 L 17.82,102.70 L 20.23,100.00 L 17.82,97.30 L 21.37,98.04 ZM 177.50,94.60 L 178.63,98.04 L 182.18,97.30 L 179.77,100.00 L 182.18,102.70 L 178.63,101.96 L 177.50,105.40 L 176.37,101.96 L 172.82,102.70 L 175.23,100.00 L 172.82,97.30 L 176.37,98.04 Z</g>
+            <g transform="translate(0,-1.2)" fill="#fbedc6" opacity=".38">M 22.50,94.60 L 23.63,98.04 L 27.18,97.30 L 24.77,100.00 L 27.18,102.70 L 23.63,101.96 L 22.50,105.40 L 21.37,101.96 L 17.82,102.70 L 20.23,100.00 L 17.82,97.30 L 21.37,98.04 ZM 177.50,94.60 L 178.63,98.04 L 182.18,97.30 L 179.77,100.00 L 182.18,102.70 L 178.63,101.96 L 177.50,105.40 L 176.37,101.96 L 172.82,102.70 L 175.23,100.00 L 172.82,97.30 L 176.37,98.04 Z</g>
+            <g fill="#523d18" opacity=".94">M 22.50,94.60 L 23.63,98.04 L 27.18,97.30 L 24.77,100.00 L 27.18,102.70 L 23.63,101.96 L 22.50,105.40 L 21.37,101.96 L 17.82,102.70 L 20.23,100.00 L 17.82,97.30 L 21.37,98.04 ZM 177.50,94.60 L 178.63,98.04 L 182.18,97.30 L 179.77,100.00 L 182.18,102.70 L 178.63,101.96 L 177.50,105.40 L 176.37,101.96 L 172.82,102.70 L 175.23,100.00 L 172.82,97.30 L 176.37,98.04 Z</g>
+            <path id="topB" d="M 37.98,77.43 A 66,66 0 0 1 162.02,77.43" fill="none"/>
             <path id="botB" d="M 34.2,123.9 A 70,70 0 0 0 165.8,123.9" fill="none"/>
-            <g font-family="'Bodoni Moda', Didot, Georgia, serif" font-weight="600">
-              <text font-size="19" letter-spacing="5.5" fill="#57411b" opacity=".92">
-                <textPath href="#topB" startOffset="50%" text-anchor="middle">TAILS</textPath>
-              </text>
-              <text font-size="19" letter-spacing="5.5" fill="#fae7ba" opacity=".22" transform="translate(0,-1.1)">
-                <textPath href="#topB" startOffset="50%" text-anchor="middle">TAILS</textPath>
-              </text>
-              <text font-size="10.5" letter-spacing="4" fill="#57411b" opacity=".7">
-                <textPath href="#botB" startOffset="50%" text-anchor="middle">· MMXXVI ·</textPath>
-              </text>
-            </g>
+            <text class="coin-name coin-name--light" id="nameBLight" x="0" y="-1.1"
+                  font-size="18" letter-spacing="4.4" fill="#fbedc6" opacity=".34" transform="translate(0,-1.1)">
+              <textPath href="#topB" startOffset="50%" text-anchor="middle"></textPath>
+            </text>
+            <text class="coin-name" id="nameB"
+                  font-size="18" letter-spacing="4.4" fill="#4a3714" opacity=".95">
+              <textPath href="#topB" startOffset="50%" text-anchor="middle"></textPath>
+            </text>
+            <text class="coin-motto" font-size="10.5" letter-spacing="4.5" fill="#43310f" opacity=".8">
+              <textPath href="#botB" startOffset="50%" text-anchor="middle">· FORTVNA ·</textPath>
+            </text>
             </g>
           </svg>
             </div>
@@ -597,11 +649,44 @@
     headsBtn.classList.toggle('chosen', mySide() === 'heads');
     tailsBtn.classList.toggle('chosen', mySide() === 'tails');
     remoteSideDisplay.textContent = (connected && calledSide) ? theirSide() : '';
+    inscribeCoin();
   }
 
   function renderNames() {
     remoteNameDisplay.textContent = remoteName || 'Waiting to join';
     remoteNameDisplay.classList.toggle('is-empty', !remoteName);
+    inscribeCoin();
+  }
+
+  // The rim legend is struck with whoever holds that face. An unclaimed face
+  // reads IGNOTVS — unknown.
+  const ARC_LIMIT = 150;   // user units available along the upper rim arc
+
+  function inscribe(tag, name) {
+    const main = document.getElementById('name' + tag);
+    const light = document.getElementById('name' + tag + 'Light');
+    const text = (name || 'Ignotvs').toUpperCase();
+    main.firstElementChild.textContent = text;
+    light.firstElementChild.textContent = text;
+
+    let size = 18, tracking = 4.4;
+    for (let i = 0; i < 16; i++) {
+      main.setAttribute('font-size', size);
+      main.setAttribute('letter-spacing', tracking);
+      let len = 0;
+      try { len = main.getComputedTextLength(); } catch (e) { len = 0; }
+      if (!len || len <= ARC_LIMIT) break;
+      size -= 0.9;
+      tracking = Math.max(0.5, tracking - 0.34);
+    }
+    light.setAttribute('font-size', main.getAttribute('font-size'));
+    light.setAttribute('letter-spacing', main.getAttribute('letter-spacing'));
+  }
+
+  function inscribeCoin() {
+    const side = mySide();
+    inscribe('A', side ? (side === 'heads' ? localName : remoteName) : '');
+    inscribe('B', side ? (side === 'tails' ? localName : remoteName) : '');
   }
 
   function updateStatus() {
@@ -722,6 +807,7 @@
   localNameInput.addEventListener('input', function () {
     localName = localNameInput.value.trim();
     send({ type: 'hello', name: localName });
+    inscribeCoin();
     checkReady();
   });
 
@@ -761,6 +847,10 @@
 
   renderNames();
   renderSideUI();
+
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(inscribeCoin);
+  }
 })();
 </script>
 </body>

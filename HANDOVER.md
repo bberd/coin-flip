@@ -45,16 +45,28 @@ thing to do.
   the same outcome from the same `result` + `calledSide`, so they should always
   agree — not verified in a live test yet).
 - **Coin art**: two hand-built inline SVGs (not images). Obverse is a 24-ray
-  radiate crown around a faceted boss, legend "HEADS"; reverse is a laurel
-  wreath opening at the top around "SPQR", legend "TAILS". Both carry "MMXXVI"
-  on the lower rim. Every emblem is generated from polar math (rays at 2pi*i/N,
-  wreath leaves swept along an arc), so symmetry is exact rather than
+  radiate crown around a faceted boss; reverse is a laurel wreath opening at the
+  top around a compass star. Every emblem is generated from polar math (rays at
+  2pi*i/N, wreath leaves swept along an arc), so symmetry is exact rather than
   hand-tuned — if you edit them, regenerate rather than nudging coordinates.
   Relief is faked by drawing each emblem three times: a dark copy offset +1.5px,
   a light copy offset -1.2px, then the solid on top. A
-  `feTurbulence`/`feDisplacementMap` filter roughens the strike.
-  Both faces name their side in the legend, so a result is readable at a glance
-  without consulting the text below the coin.
+  `feTurbulence`/`feDisplacementMap` filter roughens the strike, and three small
+  verdigris radial gradients stain the disc. Both faces carry "· FORTVNA ·" on
+  the lower rim.
+- **The rim inscription**: the upper rim of each face is struck with the *name of
+  whoever holds that face* — not the words "heads"/"tails", which appear nowhere
+  on the coin. So the face that lands up shows the winner's name. Set by
+  `inscribeCoin()`, which reads `localName`/`remoteName` against `mySide()`, so it
+  must be re-run whenever a name OR a side assignment changes; it is called from
+  `renderNames()`, `renderSideUI()`, the name `input` handler, and again on
+  `document.fonts.ready` (the fit depends on the loaded face). An unclaimed face
+  reads IGNOTVS.
+  `inscribe()` shrinks font-size and tracking in a loop against
+  `getComputedTextLength()` until the text fits `ARC_LIMIT` (150 user units along
+  a 66-radius arc). Verified by rendering names of 0, 2, 4, 5, 8, 10, 12, 15 and
+  19 characters — the 20-char `maxlength` is the ceiling. If you move the arc,
+  re-derive ARC_LIMIT from its radius or long names will overrun the beading.
 
 ## Design direction — "Struck"
 An engraver's proof sheet at night. The page splits into two mirrored
@@ -66,10 +78,13 @@ on; the winning territory takes a patina rule and a soft wash after each flip.
 - Win state: verdigris (`--patina #5fa892`) — the colour brass actually oxidises
   to, used *only* to mark the winner. Don't spend it elsewhere.
 - Text: chalk (`--chalk #ece8dd`, `--chalk-dim #8b8877`)
-- Type: Bodoni Moda for the wordmark, verdict line and coin legends (banknote /
-  medal engraving lineage); IBM Plex Mono for every label, input and ledger
-  figure. Both from Google Fonts, with local fallbacks — the page is now no
-  longer dependency-free at render time, though it degrades to the fallbacks.
+- Type: Cinzel for the wordmark, verdict line and coin inscriptions — it is
+  drawn from Roman monumental capitals, which is why the rim lettering reads as
+  struck rather than set. IBM Plex Mono for every label, input and ledger figure.
+  Both from Google Fonts, with local fallbacks — the page is no longer
+  dependency-free at render time, though it degrades to the fallbacks.
+  Cinzel Decorative was tried for the wordmark and rejected: its swashes merge
+  the LL of "CALL" into an illegible mass.
 - **Signature**: the guilloche rosette behind the coin is a real hypotrochoid,
   the curve family used for banknote and coin-die security engraving, generated
   offline and inlined as two `<path>`s (~15KB of the file). It rotates 120
