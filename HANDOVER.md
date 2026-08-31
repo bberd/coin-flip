@@ -57,6 +57,20 @@ thing to do.
   re-sends its current side on `open` regardless.
 - **Flip gating**: the Flip button is separate and *does* require connected +
   both names set + sides assigned.
+- **Recovery from a dead link**: a `?room=` link lives only as long as the
+  host's page — peer ids regenerate on every load — so a link that has sat in a
+  chat is usually stale. Opening one raises PeerJS `peer-unavailable`, which
+  used to render as "Connection error — reload to retry". That was wrong advice:
+  reloading retries the same dead room id, and there was no other way forward.
+  `offerRestart()` now reveals a panel whose button drops `?room=` and reloads,
+  so the page returns as a *host* with a fresh link. The typed name rides across
+  that reload in `sessionStorage` under `callit:name` and is prefilled on load
+  (wrapped in try/catch — it throws in some privacy modes and is unavailable on
+  `file://`, so test this over http, not a local file).
+  It is offered on any fatal peer error, and to a **guest** whose host leaves.
+  Deliberately not to a host whose guest leaves: that host's link is still live
+  and someone can still join it, so re-hosting would needlessly invalidate a
+  link they may already have sent.
 - **Score**: tracked client-side on each browser independently (each side infers
   the same outcome from the same `result` + `calledSide`, so they should always
   agree — not verified in a live test yet).
@@ -186,9 +200,10 @@ winner highlight were verified; it is worth rebuilding if you touch that logic.
 2. **Simultaneous toggle** — if both players click at the same instant the two
    `call` messages cross and the sides could briefly disagree. Not handled; a
    host-authoritative assignment would fix it if it ever matters.
-3. **Reconnection handling** — if the guest refreshes or the connection drops
-   mid-session, there's currently no reconnect/retry flow; it just shows
-   "Opponent disconnected."
+3. **Reconnection handling** — there is still no automatic reconnect. A
+   stranded guest now has a manual way out (see *Recovery* above), but neither
+   side retries a dropped connection on its own, and an in-progress score is
+   lost when either side re-hosts.
 4. **Mobile layout** — the two-territory split holds down to 320px via a
    `max-width: 380px` media query that shrinks the coin and rosette. Verified by
    rendering at that width, not on a physical handset.
