@@ -65,8 +65,10 @@ thing to do.
   `A rx,ry` as though it were a coordinate pair (and then again as a radius)
   silently turns the cradle into a shallow ellipse rather than erroring. It
   still renders, just wrong — which is how it shipped once. Reverse (tails) is a **man's head in profile
-  wearing a rattail**; its ear is an evenodd cut, and nothing in that path
-  overlaps. The two faces are deliberately unalike, rectilinear against organic, so
+  wearing a rattail**, drawn as a plain silhouette. An ear was cut into it with
+  evenodd and removed again — at coin scale it read as a crescent moon sitting
+  in the middle of the head. The profile now carries no internal cuts at all,
+  and its `fill-rule="evenodd"` is vestigial. The two faces are deliberately unalike, rectilinear against organic, so
   a glance tells them apart before you read the name.
 - **Drawing the profile is the hard part.** It took ten rendered iterations, and
   every failure mode is worth knowing before you touch it: straight `L` segments
@@ -122,10 +124,22 @@ An engraver's proof sheet at night. The page splits into two mirrored
 territories, yours and theirs, divided by an engraved seam that the coin sits
 on; the winning territory takes a patina rule and a soft wash after each flip.
 
-- The coin's `sheen` gradient carries a dark stop at its lower-right. It sits
-  at 0.21 opacity; it was 0.42, which buried the relief on that side and made
-  the emblems hard to read. Treat that value as a legibility setting, not a
-  decorative one.
+- **What darkens the coin's lower-right** — the thing that makes rim text hard
+  to read at the end of a word. Two gradients contribute, and it is worth
+  knowing which dominates:
+  1. `metal`, the radial gradient. Centred off-axis at 38%/28%, so the
+     lower-right is the farthest point and takes the darkest stop. **This is the
+     dominant one.** Its outer stops were `#4a3616`/`#241a0b`, which buried the
+     end of FORTVNA in near-black; they are now `#6d5326`/`#4a3818`, and the
+     centre/radius moved from 33%/23% r=88% to 38%/28% r=96% for a gentler
+     falloff.
+  2. `sheen`, a linear overlay whose dark stop sits at 0.21 (was 0.42). Real but
+     secondary — halving it alone did *not* fix the motto.
+  Treat both as legibility settings. If rim text goes muddy again, reach for
+  `metal`'s outer stops first.
+- The motto deliberately has **no** light ghost copy, unlike the name. At 10.5px
+  the 1.1px offset is proportionally far larger than it is on the 18px name, and
+  it fuzzes the letters at the coin's real 186px size. Tested both ways.
 - Ground: indigo-slate (`--ink #0f1420`), vignetted via a radial gradient
 - Metal: brass (`--brass-hi #f3dca4`, `--brass #c9a24d`, `--brass-deep #7a5d24`)
 - Win state: verdigris (`--patina #5fa892`) — the colour brass actually oxidises
