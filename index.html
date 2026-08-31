@@ -113,6 +113,12 @@
   }
   .recovery-btn:hover { transform: translateY(-1px); }
   .recovery-btn:active { transform: translateY(1px); }
+  .recovery-sub {
+    margin: 12px 0 0 !important;
+    font-size: 9px !important; letter-spacing: .16em;
+    color: rgba(139,136,119,.85);
+  }
+  .recovery-sub[hidden] { display: none; }
 
   /* ---------- invite plate ---------- */
 
@@ -342,7 +348,8 @@
 
     <div class="recovery" id="recovery" hidden>
       <p id="recoveryNote">That link is no longer live</p>
-      <button class="recovery-btn" id="restartBtn">Start a new toss as host</button>
+      <button class="recovery-btn" id="restartBtn">Host this room yourself</button>
+      <p class="recovery-sub" id="recoverySub" hidden>The link you opened keeps working</p>
     </div>
 
     <div class="invite-box" id="inviteBox" hidden>
@@ -535,6 +542,9 @@
 (function () {
   const params = new URLSearchParams(location.search);
   const roomId = params.get('room');
+  // ?host=<id> means "be the host, and claim this exact peer id" — that is how
+  // a taken-over room keeps the link that was already shared.
+  const hostId = params.get('host');
   const isHost = !roomId;
 
   const statusEl = document.getElementById('status');
@@ -556,6 +566,7 @@
   const ledger = document.getElementById('ledger');
   const recovery = document.getElementById('recovery');
   const recoveryNote = document.getElementById('recoveryNote');
+  const recoverySub = document.getElementById('recoverySub');
   const restartBtn = document.getElementById('restartBtn');
 
   let peer, conn, connected = false;
@@ -589,14 +600,25 @@
   // A guest whose room is gone, or anyone the broker rejects, is otherwise
   // stuck: reloading only retries the same dead room id. This drops ?room= so
   // the page comes back as a host with a fresh link, keeping the name.
-  function offerRestart(note) {
+  let restartTarget = '';
+
+  function offerRestart(note, target, label, sub) {
     recoveryNote.textContent = note;
+    restartTarget = target;
+    restartBtn.textContent = label;
+    recoverySub.textContent = sub || '';
+    recoverySub.hidden = !sub;
     recovery.hidden = false;
+  }
+
+  // Taking over the room the link points at, so the link stays valid.
+  function takeoverTarget() {
+    return location.pathname + '?host=' + encodeURIComponent(roomId);
   }
 
   restartBtn.addEventListener('click', function () {
     try { sessionStorage.setItem(NAME_KEY, localName); } catch (e) {}
-    location.href = location.pathname;
+    location.href = restartTarget || location.pathname;
   });
 
   function randomSide() { return Math.random() < 0.5 ? 'heads' : 'tails'; }
@@ -708,7 +730,10 @@
       renderSideUI();
       // The host keeps a live link others can still join, so only the guest is
       // actually stranded here.
-      if (!isHost) offerRestart('The host has left this toss');
+      if (!isHost) {
+        offerRestart('The host has left this toss', takeoverTarget(),
+                     'Host this room yourself', 'The link you opened keeps working');
+      }
     });
   }
 
@@ -808,7 +833,7 @@
   });
 
   // --- PeerJS connection setup ---
-  peer = new Peer();
+  peer = hostId ? new Peer(hostId) : new Peer();
 
   peer.on('open', function (id) {
     if (isHost) {
@@ -830,14 +855,27 @@
   }
 
   peer.on('error', function (err) {
-    const gone = err && (err.type === 'peer-unavailable' || err.type === 'unavailable-id');
+    const type = err && err.type;
     connected = false;
     document.body.classList.remove('is-live');
     flipBtn.disabled = true;
-    statusEl.textContent = gone ? 'That room has closed' : 'Connection error';
-    offerRestart(gone
-      ? 'Whoever sent you this link is no longer hosting it'
-      : 'Could not reach the connection service');
+
+    if (type === 'peer-unavailable' && roomId) {
+      // The room in the link is empty. Claim its id rather than minting a new
+      // one, so the link that was already shared still reaches someone.
+      statusEl.textContent = 'That room is empty';
+      offerRestart('Whoever sent you this link is no longer hosting it',
+                   takeoverTarget(), 'Host this room yourself',
+                   'The link you opened keeps working');
+    } else if (type === 'unavailable-id') {
+      statusEl.textContent = 'That room is already taken';
+      offerRestart('Someone else is already hosting that room',
+                   location.pathname, 'Start a fresh toss');
+    } else {
+      statusEl.textContent = 'Connection error';
+      offerRestart('Could not reach the connection service',
+                   location.pathname, 'Start a fresh toss');
+    }
     renderSideUI();
   });
 

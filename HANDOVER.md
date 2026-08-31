@@ -23,9 +23,13 @@ thing to do.
   each other — the coin-flip data itself flows peer-to-peer after that. This is
   fine for casual use but has no uptime guarantee; if it becomes flaky, the fix is
   running a self-hosted PeerServer (npm package `peer`) instead of the public one.
-- **Roles**: whoever opens the page with no `?room=` query param is the *host* and
-  gets an invite link (`?room=<peerId>`) to send. Whoever opens that link is the
-  *guest* and auto-connects.
+- **Roles**: whoever opens the page with no `?room=` query param is the *host*
+  and gets an invite link (`?room=<peerId>`) to send. Whoever opens that link is
+  the *guest* and auto-connects. A third form, `?host=<peerId>`, means "be the
+  host **and claim this exact peer id**" — `new Peer(id)` rather than
+  `new Peer()`. That is what lets a taken-over room keep the link that was
+  already shared, and it also means reloading a host page with `?host=` re-claims
+  the same id instead of minting a new one.
 - **Message protocol** (JSON objects sent over the PeerJS data connection):
   - `{type: 'hello', name}` — sent by each side whenever their name field changes.
   - `{type: 'call', side}` — `side` is always the *host's* side; the guest is
@@ -62,11 +66,18 @@ thing to do.
   chat is usually stale. Opening one raises PeerJS `peer-unavailable`, which
   used to render as "Connection error — reload to retry". That was wrong advice:
   reloading retries the same dead room id, and there was no other way forward.
-  `offerRestart()` now reveals a panel whose button drops `?room=` and reloads,
-  so the page returns as a *host* with a fresh link. The typed name rides across
-  that reload in `sessionStorage` under `callit:name` and is prefilled on load
-  (wrapped in try/catch — it throws in some privacy modes and is unavailable on
-  `file://`, so test this over http, not a local file).
+  `offerRestart(note, target, label, sub)` now reveals a panel whose button
+  navigates to `?host=<the dead room id>`, so the page returns as a host that has
+  **claimed that same id** — the link already sitting in someone's chat keeps
+  working, and whoever else holds it can still join. Verified by asserting the
+  regenerated invite link is byte-identical to the original.
+  The typed name rides across that reload in `sessionStorage` under
+  `callit:name` and is prefilled on load (wrapped in try/catch — it throws in
+  some privacy modes and is unavailable on `file://`, so test this over http,
+  not a local file).
+  If the claim fails because someone genuinely holds that id, PeerJS raises
+  `unavailable-id`; that case offers a *fresh* toss at a bare pathname instead,
+  so a takeover cannot loop trying to claim an id it will never get.
   It is offered on any fatal peer error, and to a **guest** whose host leaves.
   Deliberately not to a host whose guest leaves: that host's link is still live
   and someone can still join it, so re-hosting would needlessly invalidate a
