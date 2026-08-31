@@ -39,16 +39,28 @@ thing to do.
   as two buttons on both cards with the local player's side highlighted. Either
   player can toggle the assignment until the first flip, after which the buttons
   are disabled and greyed for the rest of the session.
+- **Live preview**: until the first flip locks things in, the coin shows the
+  face *you* hold. `previewSide()` turns it on any side change (a shorter
+  `.previewing` transition, so it doesn't read as a real flip), and it is a
+  no-op once `flipping` or `sidesLocked` is true — `doFlip()` sets both before it
+  calls `renderSideUI()`, which is what stops the preview fighting the flip
+  animation. It also strips `.previewing` so the flip doesn't inherit that
+  timing.
 - **Flip gating**: the Flip button stays disabled until: connected + both names
   set + sides assigned.
 - **Score**: tracked client-side on each browser independently (each side infers
   the same outcome from the same `result` + `calledSide`, so they should always
   agree — not verified in a live test yet).
-- **Coin art**: two hand-built inline SVGs (not images). Obverse is a 24-ray
-  radiate crown around a faceted boss; reverse is a laurel wreath opening at the
-  top around a compass star. Every emblem is generated from polar math (rays at
-  2pi*i/N, wreath leaves swept along an arc), so symmetry is exact rather than
-  hand-tuned — if you edit them, regenerate rather than nudging coordinates.
+- **Coin art**: two hand-built inline SVGs (not images). Obverse is a
+  guillotine — uprights, lintel, mouton, oblique blade and a lunette whose neck
+  hole is cut with `fill-rule="evenodd"` (nothing else in that path overlaps, so
+  evenodd is safe there; if you add an overlapping subpath it will punch an
+  unintended hole). Reverse is a laurel wreath opening at the top around a
+  compass star. The two faces are deliberately unalike — rectilinear and
+  asymmetric against circular and organic — so a glance tells them apart even
+  before you read the name. The wreath is generated from polar math (leaves
+  swept along an arc), so its symmetry is exact rather than hand-tuned; if you
+  edit it, regenerate rather than nudging coordinates.
   Relief is faked by drawing each emblem three times: a dark copy offset +1.5px,
   a light copy offset -1.2px, then the solid on top. A
   `feTurbulence`/`feDisplacementMap` filter roughens the strike, and three small
@@ -62,6 +74,8 @@ thing to do.
   `renderNames()`, `renderSideUI()`, the name `input` handler, and again on
   `document.fonts.ready` (the fit depends on the loaded face). An unclaimed face
   reads IGNOTVS.
+  Because the inscription depends on the side assignment, switching sides also
+  swaps which face carries which name.
   `inscribe()` shrinks font-size and tracking in a loop against
   `getComputedTextLength()` until the text fits `ARC_LIMIT` (150 user units along
   a 66-radius arc). Verified by rendering names of 0, 2, 4, 5, 8, 10, 12, 15 and
@@ -90,6 +104,15 @@ on; the winning territory takes a patina rule and a soft wash after each flip.
   offline and inlined as two `<path>`s (~15KB of the file). It rotates 120
   degrees while the coin is in the air. It is the one loud element — keep
   everything around it quiet.
+
+## Testing
+`index.html` has no test suite, but the interaction is coverable without a
+second device: stub `Peer` with an in-page loopback that fires `open` then
+`connection`, and echoes a `hello` back as the opponent. The real app code then
+reaches `connected`, the side buttons enable, and `.click()` on them drives the
+genuine handlers. Overriding `Math.random` first makes the drawn side
+deterministic. This is how the side-switch preview, the lock-on-flip and the
+winner highlight were verified; it is worth rebuilding if you touch that logic.
 
 ## Known gaps / suggested next steps
 1. **Live two-device test** — deploy to GitHub Pages, open on two separate
