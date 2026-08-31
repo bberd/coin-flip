@@ -561,7 +561,7 @@
   }
 
   function renderSideUI() {
-    const canSwap = connected && !!calledSide && !sidesLocked && !flipping;
+    const canSwap = !!calledSide && !sidesLocked && !flipping;
     headsBtn.disabled = !canSwap;
     tailsBtn.disabled = !canSwap;
     headsBtn.classList.toggle('chosen', mySide() === 'heads');
@@ -721,7 +721,7 @@
   }
 
   function chooseSide(side) {
-    if (sidesLocked || flipping || !connected || side === mySide()) return;
+    if (sidesLocked || flipping || !calledSide || side === mySide()) return;
     calledSide = isHost ? side : oppositeSide(side);
     send({ type: 'call', side: calledSide });
     renderSideUI();

@@ -46,8 +46,17 @@ thing to do.
   calls `renderSideUI()`, which is what stops the preview fighting the flip
   animation. It also strips `.previewing` so the flip doesn't inherit that
   timing.
-- **Flip gating**: the Flip button stays disabled until: connected + both names
-  set + sides assigned.
+- **Side-switch gating**: the Heads/Tails buttons are gated on `calledSide`,
+  **not** on `connected`. That distinction matters: the host draws a side at
+  load and owns it, so they can change it while waiting for someone to join —
+  gating on `connected` left them staring at greyed buttons with a side they
+  never chose. A guest has no `calledSide` until the host's `call` arrives,
+  which can only happen once connected, so the same condition keeps them
+  correctly disabled while connecting. Sending a `call` before the connection
+  opens is harmless: `send()` no-ops when the conn isn't open, and the host
+  re-sends its current side on `open` regardless.
+- **Flip gating**: the Flip button is separate and *does* require connected +
+  both names set + sides assigned.
 - **Score**: tracked client-side on each browser independently (each side infers
   the same outcome from the same `result` + `calledSide`, so they should always
   agree — not verified in a live test yet).
