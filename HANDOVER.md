@@ -53,12 +53,15 @@ thing to do.
   agree — not verified in a live test yet).
 - **Coin art**: two hand-built inline SVGs (not images), and both are puns on
   the side they represent. Obverse (heads) is a **guillotine** — uprights,
-  lintel, mouton, oblique blade and a lunette whose neck hole is cut with
-  `fill-rule="evenodd"`. Reverse (tails) is a **man's head in profile wearing a
-  rattail**, the tail hanging from the nape past the bust truncation; its ear is
-  also an evenodd cut. In both paths nothing else overlaps, which is what makes
-  evenodd safe — add an overlapping subpath and you will punch an unintended
-  hole. The two faces are deliberately unalike, rectilinear against organic, so
+  lintel, oblique blade, and a beam with a semicircular **neck cradle** notched
+  into its top edge. That notch replaced an enclosed circular hole: any beam
+  thin enough to look right leaves only 2–3 unit slivers above and below a hole
+  that size, and the result reads as an hourglass. A notch carved into the
+  outline has no such constraint. The beam spans exactly upright-to-upright so
+  it reads as connected — touching, never overlapping, since an overlap under
+  evenodd would punch a hole. Reverse (tails) is a **man's head in profile
+  wearing a rattail**; its ear is an evenodd cut, and nothing in that path
+  overlaps. The two faces are deliberately unalike, rectilinear against organic, so
   a glance tells them apart before you read the name.
 - **Drawing the profile is the hard part.** It took ten rendered iterations, and
   every failure mode is worth knowing before you touch it: straight `L` segments
@@ -67,6 +70,13 @@ thing to do.
   merge into one ball; features need exaggeration, since a 3-unit step is under
   3px on the rendered coin; and the rattail must be rooted at the *nape* and
   hang clear of the bust, or it merges into the shoulder and reads as a hook.
+  The tail itself is a separate path (not part of the evenodd outline), so it
+  may overlap the head freely — that overlap is what attaches it. Its shape is
+  offset from a centreline, and the thing that makes it read as *tied* hair is a
+  **pinch**: narrow it sharply where the tie sits, then let it swell again
+  below. A tie drawn as its own shape is invisible, being the same fill as the
+  tail. Width matters — 9–13 units reads as a scarf, ~5 tapering to ~3 reads as
+  a braid.
   A hairline groove was tried and removed — it read as a swim cap. Render it
   before you believe it.
   Relief is faked by drawing each emblem three times: a dark copy offset +1.5px,
@@ -107,6 +117,10 @@ An engraver's proof sheet at night. The page splits into two mirrored
 territories, yours and theirs, divided by an engraved seam that the coin sits
 on; the winning territory takes a patina rule and a soft wash after each flip.
 
+- The coin's `sheen` gradient carries a dark stop at its lower-right. It sits
+  at 0.21 opacity; it was 0.42, which buried the relief on that side and made
+  the emblems hard to read. Treat that value as a legibility setting, not a
+  decorative one.
 - Ground: indigo-slate (`--ink #0f1420`), vignetted via a radial gradient
 - Metal: brass (`--brass-hi #f3dca4`, `--brass #c9a24d`, `--brass-deep #7a5d24`)
 - Win state: verdigris (`--patina #5fa892`) — the colour brass actually oxidises
