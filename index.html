@@ -3,410 +3,534 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Coin Flip — Call It</title>
+<title>Call It — Shared Coin Flip</title>
+<meta name="description" content="Two people, two computers, one coin flip. Peer-to-peer, no backend.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400..900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/peerjs@1/dist/peerjs.min.js"></script>
 <style>
   :root {
-    --felt-dark: #0d3b2e;
-    --felt: #12503e;
-    --felt-light: #17604a;
-    --gold-light: #f6dfa0;
-    --gold: #d4af6a;
-    --gold-dark: #9a7530;
-    --bronze: #b9793f;
-    --bronze-dark: #8a5a2c;
-    --cream: #f2e9d8;
-    --cream-dim: #cfc2a4;
-    --ink: #3a2814;
+    --ink:       #0f1420;
+    --ink-2:     #161d2c;
+    --brass-hi:  #f3dca4;
+    --brass:     #c9a24d;
+    --brass-deep:#7a5d24;
+    --patina:    #5fa892;
+    --chalk:     #ece8dd;
+    --chalk-dim: #8b8877;
+    --rule:      rgba(201,162,77,.20);
+    --seam:      rgba(201,162,77,.30);
+    --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --display: 'Bodoni Moda', Didot, 'Times New Roman', Georgia, serif;
   }
 
   * { box-sizing: border-box; }
 
-  html, body {
-    margin: 0;
-    min-height: 100%;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    background: var(--felt-dark);
-  }
+  html, body { margin: 0; min-height: 100%; background: var(--ink); }
 
-  .coin-app {
+  body {
     background:
-      radial-gradient(ellipse at 50% 15%, var(--felt-light) 0%, var(--felt) 45%, var(--felt-dark) 100%);
-    color: var(--cream);
-    min-height: 100vh;
-    padding: 40px 20px 48px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+      radial-gradient(120% 78% at 50% -12%, #1c2538 0%, #131a29 46%, #0b0f18 100%);
+    color: var(--chalk);
+    font-family: var(--mono);
+    -webkit-font-smoothing: antialiased;
   }
 
-  .panel {
-    width: 100%;
-    max-width: 380px;
+  .app {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: clamp(26px, 7vw, 54px) 20px 52px;
+  }
+
+  .panel { width: 100%; max-width: 470px; }
+
+  /* ---------- masthead ---------- */
+
+  .eyebrow {
+    font-size: 9.5px;
+    letter-spacing: .38em;
+    text-transform: uppercase;
+    color: var(--chalk-dim);
+    text-align: center;
   }
 
   h1 {
-    font-family: Georgia, "Iowan Old Style", serif;
+    font-family: var(--display);
     font-weight: 700;
-    font-size: 26px;
+    font-size: clamp(42px, 13vw, 60px);
+    line-height: 1;
+    letter-spacing: .15em;
+    text-transform: uppercase;
     text-align: center;
-    margin: 0 0 4px;
-    color: var(--gold-light);
+    margin: 12px 0 0;
+    text-indent: .15em;
+    color: var(--brass-hi);
+    text-shadow: 0 2px 0 rgba(0,0,0,.45);
   }
+
+  .rule { display: flex; align-items: center; gap: 11px; margin: 16px 0 12px; }
+  .rule::before, .rule::after {
+    content: ""; flex: 1; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--rule), transparent);
+  }
+  .rule i { width: 5px; height: 5px; background: var(--brass); opacity: .65; transform: rotate(45deg); }
 
   .status {
-    text-align: center;
-    font-size: 13px;
-    color: var(--cream-dim);
-    min-height: 18px;
-    margin-bottom: 20px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    font-size: 10px; letter-spacing: .2em; text-transform: uppercase;
+    color: var(--chalk-dim); min-height: 16px;
   }
+  .status::before {
+    content: ""; width: 5px; height: 5px; border-radius: 50%;
+    background: var(--chalk-dim); opacity: .5; transition: background .3s, opacity .3s;
+  }
+  body.is-live .status::before { background: var(--patina); opacity: 1; box-shadow: 0 0 8px var(--patina); }
+
+  /* ---------- invite plate ---------- */
 
   .invite-box {
-    background: rgba(0,0,0,0.2);
-    border: 1px solid rgba(246,223,160,0.25);
-    border-radius: 10px;
-    padding: 12px 14px;
-    margin-bottom: 22px;
+    margin-top: 22px;
+    border: 1px solid var(--rule);
+    background: rgba(255,255,255,.022);
+    padding: 13px 14px 14px;
   }
-
   .invite-box p {
-    margin: 0 0 8px;
-    font-size: 12px;
-    color: var(--cream-dim);
+    margin: 0 0 9px;
+    font-size: 9.5px; letter-spacing: .2em; text-transform: uppercase; color: var(--chalk-dim);
   }
-
-  .invite-row {
-    display: flex;
-    gap: 8px;
-  }
-
+  .invite-row { display: flex; gap: 8px; }
   .invite-row input {
-    flex: 1;
-    min-width: 0;
-    background: rgba(0,0,0,0.25);
-    border: 1px solid rgba(246,223,160,0.2);
-    border-radius: 6px;
-    color: var(--cream);
-    padding: 8px 10px;
-    font-size: 12px;
+    flex: 1; min-width: 0;
+    background: rgba(0,0,0,.3);
+    border: 1px solid var(--rule);
+    color: var(--brass-hi);
+    font-family: var(--mono); font-size: 11px;
+    padding: 9px 10px;
   }
-
   .copy-btn {
-    background: var(--bronze);
-    color: var(--cream);
-    border: none;
-    border-radius: 6px;
-    padding: 0 14px;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
+    font-family: var(--mono); font-size: 9.5px; font-weight: 600;
+    letter-spacing: .2em; text-transform: uppercase;
+    background: transparent; border: 1px solid var(--brass-deep);
+    color: var(--brass-hi); padding: 0 15px; cursor: pointer;
+    transition: background .2s, color .2s;
+  }
+  .copy-btn:hover { background: var(--brass-hi); color: #241a06; }
+
+  /* ---------- the field: two territories split by an engraved seam ---------- */
+
+  .field { position: relative; margin-top: 26px; }
+  .field::before {
+    content: ""; position: absolute; left: 50%; top: 0; bottom: 42px;
+    width: 1px; margin-left: -.5px; pointer-events: none;
+    background: linear-gradient(180deg, transparent, var(--seam) 10%, var(--seam) 86%, transparent);
   }
 
-  .players {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 18px;
+  .table {
+    display: grid; grid-template-columns: 1fr 1fr;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
   }
 
-  .player-card {
-    background: rgba(0,0,0,0.18);
-    border: 1px solid rgba(246,223,160,0.18);
-    border-radius: 10px;
-    padding: 12px;
+  .territory { position: relative; padding: 15px 17px 17px; transition: background .5s ease; }
+  .territory::after {
+    content: ""; position: absolute; left: 0; right: 0; top: -1px; height: 1px;
+    background: var(--patina); opacity: 0; transition: opacity .45s;
+  }
+  .territory.is-winner::after { opacity: 1; }
+  .territory--mine   { padding-left: 0; }
+  .territory--theirs { padding-right: 0; text-align: right; }
+
+  .territory.is-winner { background: linear-gradient(180deg, rgba(95,168,146,.16), transparent 72%); }
+  .territory.is-winner .territory__role { color: var(--patina); }
+
+  .territory__role {
+    font-size: 9px; letter-spacing: .28em; text-transform: uppercase;
+    color: var(--chalk-dim); margin-bottom: 9px; transition: color .4s;
   }
 
-  .player-card__role {
-    font-size: 11px;
-    color: var(--cream-dim);
-    margin-bottom: 6px;
-  }
-
-  .player-card input {
+  .territory input {
     width: 100%;
-    background: rgba(0,0,0,0.25);
-    border: 1px solid rgba(246,223,160,0.25);
-    border-radius: 6px;
-    color: var(--cream);
-    padding: 8px 9px;
-    font-size: 14px;
-    margin-bottom: 8px;
+    background: transparent; border: 0; border-bottom: 1px solid var(--rule);
+    color: var(--chalk); font-family: var(--mono); font-size: 14px;
+    padding: 4px 0 7px; margin-bottom: 12px;
   }
+  .territory input::placeholder { color: rgba(139,136,119,.6); }
+  .territory input:focus { outline: 0; border-bottom-color: var(--brass); }
 
-  .player-card input:focus-visible {
-    outline: 2px solid var(--gold-light);
-    outline-offset: 1px;
+  .opponent-name {
+    font-size: 14px; color: var(--chalk); padding: 4px 0 7px;
+    border-bottom: 1px solid var(--rule); margin-bottom: 12px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
+  .opponent-name.is-empty { color: rgba(139,136,119,.7); }
 
-  .player-card__side {
-    font-size: 13px;
-    color: var(--gold-light);
-    min-height: 18px;
-  }
-
-  .side-buttons {
-    display: flex;
-    gap: 6px;
-  }
-
+  .side-buttons { display: flex; gap: 6px; }
   .side-btn {
-    flex: 1;
-    background: rgba(0,0,0,0.25);
-    border: 1px solid rgba(246,223,160,0.3);
-    color: var(--cream);
-    padding: 7px 0;
-    border-radius: 6px;
-    font-size: 13px;
-    cursor: pointer;
+    flex: 1; cursor: pointer;
+    font-family: var(--mono); font-size: 9.5px; font-weight: 500;
+    letter-spacing: .2em; text-transform: uppercase;
+    padding: 9px 0;
+    background: rgba(255,255,255,.03);
+    border: 1px solid var(--rule);
+    color: var(--chalk-dim);
+    transition: background .25s, color .25s, border-color .25s, opacity .35s;
   }
-
+  .side-btn:hover:not(:disabled) { border-color: var(--brass-deep); color: var(--brass-hi); }
   .side-btn.chosen {
-    background: linear-gradient(180deg, var(--gold-light), var(--gold));
-    color: var(--ink);
-    font-weight: 700;
-    border-color: var(--gold-dark);
+    background: linear-gradient(180deg, var(--brass-hi), var(--brass));
+    border-color: var(--brass-deep);
+    color: #2a1f0a; font-weight: 600;
+  }
+  .side-btn:disabled { cursor: default; opacity: .34; }
+  .side-btn.chosen:disabled { opacity: .5; }
+
+  .side-readout {
+    font-size: 10px; letter-spacing: .2em; text-transform: uppercase;
+    color: var(--brass-hi); min-height: 15px;
   }
 
-  .side-btn:disabled {
-    opacity: 0.45;
-    cursor: default;
-  }
+  /* ---------- arena ---------- */
 
-  .coin-stage {
-    perspective: 1000px;
-    width: 160px;
-    height: 160px;
-    margin: 10px auto 16px;
+  .arena { position: relative; display: grid; place-items: center; padding: 34px 0 8px; }
+
+  .rosette {
+    position: absolute; width: 310px; height: 310px; pointer-events: none;
+    opacity: .3; color: var(--brass);
   }
+  .rosette path { fill: none; stroke: currentColor; vector-effect: non-scaling-stroke; }
+  .rosette .g1 { stroke-width: .4; opacity: .85; }
+  .rosette .g2 { stroke-width: .3; opacity: .5; }
+  body.is-flipping .rosette { animation: rosette-turn 1.1s cubic-bezier(.4,0,.2,1); }
+  @keyframes rosette-turn { from { transform: rotate(0); } to { transform: rotate(120deg); } }
+
+  .coin-stage { width: 186px; height: 186px; perspective: 1100px; position: relative; z-index: 1; }
 
   .coin {
-    width: 100%;
-    height: 100%;
-    position: relative;
+    width: 100%; height: 100%; position: relative;
     transform-style: preserve-3d;
     transition: transform 1.1s cubic-bezier(.34, 1.1, .3, 1);
   }
-
-  .coin.spinning {
-    animation: spin-coin 1.1s cubic-bezier(.4, 0, .2, 1);
-  }
-
+  .coin.spinning { animation: spin-coin 1.1s cubic-bezier(.4, 0, .2, 1); }
   @keyframes spin-coin {
     0%   { transform: rotateY(0deg) translateY(0); }
-    50%  { transform: rotateY(900deg) translateY(-32px); }
+    50%  { transform: rotateY(900deg) translateY(-40px); }
     100% { transform: rotateY(1800deg) translateY(0); }
   }
 
   .coin__face {
-    position: absolute;
-    inset: 0;
-    border-radius: 50%;
+    position: absolute; inset: 0; border-radius: 50%;
     backface-visibility: hidden;
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 16px 34px rgba(0,0,0,.6), 0 0 0 1px rgba(0,0,0,.45);
   }
-
-  .coin__face svg {
-    width: 100%;
-    height: 100%;
-    display: block;
-    border-radius: 50%;
-  }
-
+  .coin__face svg { width: 100%; height: 100%; display: block; border-radius: 50%; }
   .coin__face--back { transform: rotateY(180deg); }
 
-  .result {
-    text-align: center;
-    font-family: Georgia, "Iowan Old Style", serif;
-    font-size: 19px;
-    min-height: 26px;
-    margin-bottom: 16px;
+  .cast-shadow {
+    position: absolute; bottom: 2px; width: 128px; height: 15px; border-radius: 50%;
+    background: radial-gradient(ellipse at center, rgba(0,0,0,.6), transparent 68%);
+    filter: blur(3px);
   }
 
-  .result span { color: var(--gold-light); }
+  /* ---------- verdict ---------- */
 
-  .flip-row { display: flex; justify-content: center; margin-bottom: 20px; }
+  .result {
+    font-family: var(--display); font-size: 21px; line-height: 1.35;
+    text-align: center; color: var(--chalk);
+    min-height: 30px; margin: 22px 0 20px;
+  }
+  .result span { color: var(--brass-hi); }
+  .result.muted { font-family: var(--mono); font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--chalk-dim); }
+
+  .flip-row { display: flex; justify-content: center; }
 
   .flip-btn {
-    background: linear-gradient(180deg, var(--bronze), var(--bronze-dark));
-    color: var(--cream);
-    border: none;
-    padding: 13px 34px;
-    border-radius: 999px;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    font-family: var(--mono); font-size: 10.5px; font-weight: 600;
+    letter-spacing: .3em; text-transform: uppercase;
+    padding: 15px 42px; cursor: pointer;
+    color: #2a1f0a;
+    background: linear-gradient(180deg, var(--brass-hi), var(--brass) 58%, #ab8339);
+    border: 1px solid var(--brass-deep);
+    box-shadow: 0 7px 20px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.55);
+    transition: transform .12s, box-shadow .2s, filter .3s, opacity .3s;
   }
+  .flip-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 10px 26px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.6); }
+  .flip-btn:active:not(:disabled) { transform: translateY(1px); box-shadow: 0 3px 10px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.4); }
+  .flip-btn:disabled { cursor: default; filter: grayscale(.85); opacity: .3; }
 
-  .flip-btn:disabled { opacity: 0.4; cursor: default; }
-  .flip-btn:focus-visible { outline: 2px solid var(--gold-light); outline-offset: 3px; }
+  :focus-visible { outline: 2px solid var(--brass-hi); outline-offset: 3px; }
 
+  /* ---------- ledger ---------- */
+
+  .ledger {
+    margin-top: 30px; padding-top: 16px;
+    border-top: 1px solid var(--rule);
+    display: flex; flex-direction: column; align-items: center; gap: 14px;
+  }
+  .ledger[hidden] { display: none; }
   .score {
+    font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--chalk-dim);
     text-align: center;
-    font-size: 14px;
-    color: var(--cream-dim);
   }
+  .score strong { color: var(--brass-hi); font-weight: 600; }
 
-  .score strong { color: var(--gold-light); }
-
-  .history-row {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 14px;
-  }
-
+  .history-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
   .chip {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    font-weight: 700;
-    font-family: Georgia, serif;
-    color: var(--ink);
-    background: linear-gradient(180deg, var(--gold-light), var(--gold));
+    width: 22px; height: 22px; border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 9px; font-weight: 600; letter-spacing: .04em;
+    border: 1px solid var(--brass-deep);
+    background: linear-gradient(180deg, var(--brass-hi), var(--brass));
+    color: #2a1f0a;
+  }
+  .chip--tails { background: transparent; border-color: var(--rule); color: var(--brass); }
+
+  @media (max-width: 380px) {
+    .coin-stage { width: 148px; height: 148px; }
+    .rosette { width: 260px; height: 260px; }
+    .territory { padding-left: 12px; padding-right: 12px; }
+    .territory--mine { padding-left: 0; }
+    .territory--theirs { padding-right: 0; }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .coin, .coin.spinning { animation: none !important; transition: none !important; }
+    .coin, .coin.spinning, .rosette { animation: none !important; transition: none !important; }
   }
 </style>
 </head>
 <body>
-<div class="coin-app">
+<div class="app">
   <div class="panel">
+
+    <div class="eyebrow">Two parties · one toss</div>
     <h1>Call It</h1>
-    <div class="status" id="status" aria-live="polite">Starting up…</div>
+    <div class="rule"><i></i></div>
+    <div class="status" id="status">Starting up</div>
 
     <div class="invite-box" id="inviteBox" hidden>
-      <p>Send this link to whoever you're flipping with:</p>
+      <p>Send this to your opponent</p>
       <div class="invite-row">
-        <input id="inviteLink" type="text" readonly>
+        <input id="inviteLink" type="text" readonly aria-label="Invite link">
         <button class="copy-btn" id="copyBtn">Copy</button>
       </div>
     </div>
 
-    <div class="players">
-      <div class="player-card">
-        <div class="player-card__role" id="localRoleLabel">You</div>
-        <input id="localNameInput" type="text" placeholder="Your name" maxlength="20" autocomplete="off">
-        <div id="localSideArea"></div>
+    <div class="field">
+      <div class="table">
+        <section class="territory territory--mine" id="territoryMine">
+          <div class="territory__role" id="localRoleLabel">You</div>
+          <input id="localNameInput" type="text" placeholder="Your name" maxlength="20" autocomplete="off" aria-label="Your name">
+          <div id="localSideArea"></div>
+        </section>
+        <section class="territory territory--theirs" id="territoryTheirs">
+          <div class="territory__role">Opponent</div>
+          <div class="opponent-name is-empty" id="remoteNameDisplay">Waiting to join</div>
+          <div class="side-readout" id="remoteSideDisplay"></div>
+        </section>
       </div>
-      <div class="player-card">
-        <div class="player-card__role">Opponent</div>
-        <div id="remoteNameDisplay" style="font-size:14px; margin-bottom:8px; color: var(--cream-dim);">Waiting to join…</div>
-        <div class="player-card__side" id="remoteSideDisplay"></div>
+
+      <div class="arena">
+        <svg class="rosette" viewBox="0 0 300 300" aria-hidden="true">
+          <path class="g1" d="M303.0 150.0L284.9 125.6L241.9 126.3L200.3 160.4L184.5 214.1L200.5 259.9L232.4 275.1L253.0 256.2L241.6 221.0L197.7 197.3L141.9 203.9L102.0 238.6L95.3 279.5L117.1 299.2L144.2 283.1L150.3 238.9L123.1 191.6L73.3 167.1L26.8 175.4L8.6 204.0L26.0 226.3L64.0 219.4L95.3 179.0L98.2 122.7L71.0 78.5L33.1 66.6L12.0 86.0L25.6 116.0L69.8 129.1L121.6 110.1L153.8 65.5L152.8 19.8L127.6 -0.7L103.4 15.0L105.0 55.2L140.5 93.5L195.5 105.8L242.4 86.7L258.8 52.2L241.5 30.0L208.8 40.3L188.3 83.3L198.5 138.0L236.6 176.7L280.4 182.6L302.5 160.6L288.7 134.3L247.1 130.0L202.7 159.3L181.3 211.2L192.4 259.4L223.0 279.4L246.4 264.1L239.9 228.8L199.6 201.0L143.6 201.8L99.7 232.5L87.9 273.4L106.8 296.8L135.2 285.2L146.0 243.1L124.2 193.7L76.9 164.0L28.8 167.2L6.2 193.8L19.6 218.5L57.0 216.5L91.8 180.3L100.5 124.7L77.9 77.3L40.6 60.2L16.3 76.4L25.1 107.0L66.6 124.7L119.6 111.3L156.5 69.9L160.9 23.4L138.1 -1.2L112.1 10.2L108.8 49.2L139.6 90.3L193.0 108.3L242.5 94.1L263.8 61.0L250.2 35.9L217.4 41.5L192.7 81.0L197.1 136.1L231.3 179.0L275.2 190.1L301.1 171.1L291.8 143.6L252.1 134.5L205.5 158.6L178.8 208.1L184.6 258.2L213.3 282.7L239.0 271.4L237.4 236.7L201.2 205.2L145.6 200.2L98.2 226.5L81.2 266.7L96.7 293.4L125.9 286.5L141.1 247.0L124.8 196.2L80.6 161.6L31.6 159.4L4.7 183.5L13.8 210.0L50.0 212.8L87.9 181.2L102.2 127.0L84.5 76.7L48.6 54.7L21.5 67.1L25.5 97.9L63.7 119.7L117.4 111.9L158.6 74.4L168.3 27.6L148.6 -0.7L121.3 6.2L113.4 43.3L139.1 86.8L190.4 110.2L241.9 101.1L267.8 70.0L258.3 42.7L226.0 43.5L197.7 79.1L196.4 134.0L226.1 180.5L269.5 196.9L298.7 181.4L294.0 153.2L256.8 139.7L208.6 158.4L176.9 205.0L177.4 256.2L203.5 285.0L231.0 278.0L234.0 244.5L202.2 209.9L147.7 199.3L97.4 220.6L75.3 259.6L87.0 289.1L116.2 286.9L135.6 250.6L124.9 198.9L84.4 159.9L34.9 152.2L4.2 173.3L8.8 200.9L43.2 208.3L83.5 181.6L103.3 129.3L90.8 76.9L56.9 50.1L27.5 58.4L26.9 88.6L61.3 114.0L114.9 111.9L160.0 78.7L175.1 32.4L158.9 0.7L131.0 3.0L118.8 37.6L139.3 82.9L187.7 111.4L240.6 107.8L270.9 79.3L265.7 50.2L234.6 46.3L203.2 77.7L196.2 131.7L221.2 181.4L263.3 203.0L295.4 191.4L295.4 163.1L261.2 145.6L212.0 158.9L175.7 201.9L170.6 253.7L193.6 286.4L222.2 284.0L229.8 252.2L202.7 215.1L150.0 199.0L97.3 215.1L70.2 252.2L77.8 284.0L106.4 286.4L129.4 253.7L124.3 201.9L88.0 158.9L38.8 145.6L4.6 163.1L4.6 191.4L36.7 203.0L78.8 181.4L103.8 131.7L96.8 77.7L65.4 46.3L34.3 50.2L29.1 79.3L59.4 107.8L112.3 111.4L160.7 82.9L181.2 37.6L169.0 3.0L141.1 0.7L124.9 32.4L140.0 78.7L185.1 111.9L238.7 114.0L273.1 88.6L272.5 58.4L243.1 50.1L209.2 76.9L196.7 129.3L216.5 181.6L256.8 208.3L291.2 200.9L295.8 173.3L265.1 152.2L215.6 159.9L175.1 198.9L164.4 250.6L183.8 286.9L213.0 289.1L224.7 259.6L202.6 220.6L152.3 199.3L97.8 209.9L66.0 244.5L69.0 278.0L96.5 285.0L122.6 256.2L123.1 205.0L91.4 158.4L43.2 139.7L6.0 153.2L1.3 181.4L30.5 196.9L73.9 180.5L103.6 134.0L102.3 79.1L74.0 43.5L41.7 42.7L32.2 70.0L58.1 101.1L109.6 110.2L160.9 86.8L186.6 43.3L178.7 6.2L151.4 -0.7L131.7 27.6L141.4 74.4L182.6 111.9L236.3 119.7L274.5 97.9L278.5 67.1L251.4 54.7L215.5 76.7L197.8 127.0L212.1 181.2L250.0 212.8L286.2 210.0L295.3 183.5L268.4 159.4L219.4 161.6L175.2 196.2L158.9 247.0L174.1 286.5L203.3 293.4L218.8 266.7L201.8 226.5L154.4 200.2L98.8 205.2L62.6 236.7L61.0 271.4L86.7 282.7L115.4 258.2L121.2 208.1L94.5 158.6L47.9 134.5L8.2 143.6L-1.1 171.1L24.8 190.1L68.7 179.0L102.9 136.1L107.3 81.0L82.6 41.5L49.8 35.9L36.2 61.0L57.5 94.1L107.0 108.3L160.4 90.3L191.2 49.2L187.9 10.2L161.9 -1.2L139.1 23.4L143.5 69.9L180.4 111.3L233.4 124.7L274.9 107.0L283.7 76.4L259.4 60.2L222.1 77.3L199.5 124.7L208.2 180.3L243.0 216.5L280.4 218.5L293.8 193.8L271.2 167.2L223.1 164.0L175.8 193.7L154.0 243.1L164.8 285.2L193.2 296.8L212.1 273.4L200.3 232.5L156.4 201.8L100.4 201.0L60.1 228.8L53.6 264.1L77.0 279.4L107.6 259.4L118.7 211.2L97.3 159.3L52.9 130.0L11.3 134.3L-2.5 160.6L19.6 182.6L63.4 176.7L101.5 138.0L111.7 83.3L91.2 40.3L58.5 30.0L41.2 52.2L57.6 86.7L104.5 105.8L159.5 93.5L195.0 55.2L196.6 15.0L172.4 -0.7L147.2 19.8L146.2 65.5L178.4 110.1L230.2 129.1L274.4 116.0L288.0 86.0L266.9 66.6L229.0 78.5L201.8 122.7L204.7 179.0L236.0 219.4L274.0 226.3L291.4 204.0L273.2 175.4L226.7 167.1L176.9 191.6L149.7 238.9L155.8 283.1L182.9 299.2L204.7 279.5L198.0 238.6L158.1 203.9L102.3 197.3L58.4 221.0L47.0 256.2L67.6 275.1L99.5 259.9L115.5 214.1L99.7 160.4L58.1 126.3L15.1 125.6L-3.0 150.0L15.1 174.4L58.1 173.7L99.7 139.6L115.5 85.9L99.5 40.1L67.6 24.9L47.0 43.8L58.4 79.0L102.3 102.7L158.1 96.1L198.0 61.4L204.7 20.5L182.9 0.8L155.8 16.9L149.7 61.1L176.9 108.4L226.7 132.9L273.2 124.6L291.4 96.0L274.0 73.7L236.0 80.6L204.7 121.0L201.8 177.3L229.0 221.5L266.9 233.4L288.0 214.0L274.4 184.0L230.2 170.9L178.4 189.9L146.2 234.5L147.2 280.2L172.4 300.7L196.6 285.0L195.0 244.8L159.5 206.5L104.5 194.2L57.6 213.3L41.2 247.8L58.5 270.0L91.2 259.7L111.7 216.7L101.5 162.0L63.4 123.3L19.6 117.4L-2.5 139.4L11.3 165.7L52.9 170.0L97.3 140.7L118.7 88.8L107.6 40.6L77.0 20.6L53.6 35.9L60.1 71.2L100.4 99.0L156.4 98.2L200.3 67.5L212.1 26.6L193.2 3.2L164.8 14.8L154.0 56.9L175.8 106.3L223.1 136.0L271.2 132.8L293.8 106.2L280.4 81.5L243.0 83.5L208.2 119.7L199.5 175.3L222.1 222.7L259.4 239.8L283.7 223.6L274.9 193.0L233.4 175.3L180.4 188.7L143.5 230.1L139.1 276.6L161.9 301.2L187.9 289.8L191.2 250.8L160.4 209.7L107.0 191.7L57.5 205.9L36.2 239.0L49.8 264.1L82.6 258.5L107.3 219.0L102.9 163.9L68.7 121.0L24.8 109.9L-1.1 128.9L8.2 156.4L47.9 165.5L94.5 141.4L121.2 91.9L115.4 41.8L86.7 17.3L61.0 28.6L62.6 63.3L98.8 94.8L154.4 99.8L201.8 73.5L218.8 33.3L203.3 6.6L174.1 13.5L158.9 53.0L175.2 103.8L219.4 138.4L268.4 140.6L295.3 116.5L286.2 90.0L250.0 87.2L212.1 118.8L197.8 173.0L215.5 223.3L251.4 245.3L278.5 232.9L274.5 202.1L236.3 180.3L182.6 188.1L141.4 225.6L131.7 272.4L151.4 300.7L178.7 293.8L186.6 256.7L160.9 213.2L109.6 189.8L58.1 198.9L32.2 230.0L41.7 257.3L74.0 256.5L102.3 220.9L103.6 166.0L73.9 119.5L30.5 103.1L1.3 118.6L6.0 146.8L43.2 160.3L91.4 141.6L123.1 95.0L122.6 43.8L96.5 15.0L69.0 22.0L66.0 55.5L97.8 90.1L152.3 100.7L202.6 79.4L224.7 40.4L213.0 10.9L183.8 13.1L164.4 49.4L175.1 101.1L215.6 140.1L265.1 147.8L295.8 126.7L291.2 99.1L256.8 91.7L216.5 118.4L196.7 170.7L209.2 223.1L243.1 249.9L272.5 241.6L273.1 211.4L238.7 186.0L185.1 188.1L140.0 221.3L124.9 267.6L141.1 299.3L169.0 297.0L181.2 262.4L160.7 217.1L112.3 188.6L59.4 192.2L29.1 220.7L34.3 249.8L65.4 253.7L96.8 222.3L103.8 168.3L78.8 118.6L36.7 97.0L4.6 108.6L4.6 136.9L38.8 154.4L88.0 141.1L124.3 98.1L129.4 46.3L106.4 13.6L77.8 16.0L70.2 47.8L97.3 84.9L150.0 101.0L202.7 84.9L229.8 47.8L222.2 16.0L193.6 13.6L170.6 46.3L175.7 98.1L212.0 141.1L261.2 154.4L295.4 136.9L295.4 108.6L263.3 97.0L221.2 118.6L196.2 168.3L203.2 222.3L234.6 253.7L265.7 249.8L270.9 220.7L240.6 192.2L187.7 188.6L139.3 217.1L118.8 262.4L131.0 297.0L158.9 299.3L175.1 267.6L160.0 221.3L114.9 188.1L61.3 186.0L26.9 211.4L27.5 241.6L56.9 249.9L90.8 223.1L103.3 170.7L83.5 118.4L43.2 91.7L8.8 99.1L4.2 126.7L34.9 147.8L84.4 140.1L124.9 101.1L135.6 49.4L116.2 13.1L87.0 10.9L75.3 40.4L97.4 79.4L147.7 100.7L202.2 90.1L234.0 55.5L231.0 22.0L203.5 15.0L177.4 43.8L176.9 95.0L208.6 141.6L256.8 160.3L294.0 146.8L298.7 118.6L269.5 103.1L226.1 119.5L196.4 166.0L197.7 220.9L226.0 256.5L258.3 257.3L267.8 230.0L241.9 198.9L190.4 189.8L139.1 213.2L113.4 256.7L121.3 293.8L148.6 300.7L168.3 272.4L158.6 225.6L117.4 188.1L63.7 180.3L25.5 202.1L21.5 232.9L48.6 245.3L84.5 223.3L102.2 173.0L87.9 118.8L50.0 87.2L13.8 90.0L4.7 116.5L31.6 140.6L80.6 138.4L124.8 103.8L141.1 53.0L125.9 13.5L96.7 6.6L81.2 33.3L98.2 73.5L145.6 99.8L201.2 94.8L237.4 63.3L239.0 28.6L213.3 17.3L184.6 41.8L178.8 91.9L205.5 141.4L252.1 165.5L291.8 156.4L301.1 128.9L275.2 109.9L231.3 121.0L197.1 163.9L192.7 219.0L217.4 258.5L250.2 264.1L263.8 239.0L242.5 205.9L193.0 191.7L139.6 209.7L108.8 250.8L112.1 289.8L138.1 301.2L160.9 276.6L156.5 230.1L119.6 188.7L66.6 175.3L25.1 193.0L16.3 223.6L40.6 239.8L77.9 222.7L100.5 175.3L91.8 119.7L57.0 83.5L19.6 81.5L6.2 106.2L28.8 132.8L76.9 136.0L124.2 106.3L146.0 56.9L135.2 14.8L106.8 3.2L87.9 26.6L99.7 67.5L143.6 98.2L199.6 99.0L239.9 71.2L246.4 35.9L223.0 20.6L192.4 40.6L181.3 88.8L202.7 140.7L247.1 170.0L288.7 165.7L302.5 139.4L280.4 117.4L236.6 123.3L198.5 162.0L188.3 216.7L208.8 259.7L241.5 270.0L258.8 247.8L242.4 213.3L195.5 194.2L140.5 206.5L105.0 244.8L103.4 285.0L127.6 300.7L152.8 280.2L153.8 234.5L121.6 189.9L69.8 170.9L25.6 184.0L12.0 214.0L33.1 233.4L71.0 221.5L98.2 177.3L95.3 121.0L64.0 80.6L26.0 73.7L8.6 96.0L26.8 124.6L73.3 132.9L123.1 108.4L150.3 61.1L144.2 16.9L117.1 0.8L95.3 20.5L102.0 61.4L141.9 96.1L197.7 102.7L241.6 79.0L253.0 43.8L232.4 24.9L200.5 40.1L184.5 85.9L200.3 139.6L241.9 173.7L284.9 174.4L303.0 150.0Z"/>
+          <path class="g2" d="M269.0 150.0L251.8 132.2L216.2 142.2L194.4 180.9L204.0 221.1L230.9 233.4L243.1 214.9L221.8 191.4L179.3 192.5L147.7 223.0L147.8 258.0L169.3 267.0L181.0 243.1L160.7 209.9L117.6 198.4L82.7 217.4L79.7 244.8L102.1 249.1L119.5 219.9L107.4 178.2L70.6 155.7L39.2 165.2L39.0 187.7L67.4 191.1L95.2 161.7L95.5 117.1L69.2 89.7L44.3 95.7L48.8 119.2L83.6 128.3L121.6 105.7L133.6 65.5L116.4 40.1L96.0 48.5L101.9 78.6L138.7 98.6L181.6 87.8L199.8 56.7L186.3 36.8L164.5 50.2L165.3 88.2L197.0 119.5L237.5 120.6L255.1 98.2L239.1 82.4L210.2 97.9L200.0 139.8L221.0 177.9L253.9 186.2L266.7 167.3L245.3 150.0L207.2 161.3L184.8 200.0L193.9 237.7L219.0 246.4L227.9 224.8L203.3 199.9L159.4 200.7L128.5 230.0L130.1 261.8L151.8 266.2L162.1 238.4L140.5 203.3L97.7 191.3L65.4 209.4L65.9 234.1L90.6 234.6L108.7 202.3L96.7 159.5L61.6 137.9L33.8 148.2L38.2 169.9L70.0 171.5L99.3 140.6L100.1 96.7L75.2 72.1L53.6 81.0L62.3 106.1L100.0 115.2L138.7 92.8L150.0 54.7L132.7 33.3L113.8 46.1L122.1 79.0L160.2 100.0L202.1 89.8L217.6 60.9L201.8 44.9L179.4 62.5L180.5 103.0L211.8 134.7L249.8 135.5L263.2 113.7L243.3 100.2L212.2 118.4L201.4 161.3L221.4 198.1L251.5 204.0L259.9 183.6L234.5 166.4L194.3 178.4L171.7 216.4L180.8 251.2L204.3 255.7L210.3 230.8L182.9 204.5L138.3 204.8L108.9 232.6L112.3 261.0L134.8 260.8L144.3 229.4L121.8 192.6L80.1 180.5L50.9 197.9L55.2 220.3L82.6 217.3L101.6 182.4L90.1 139.3L56.9 119.0L33.0 130.7L42.0 152.2L77.0 152.3L107.5 120.7L108.6 78.2L85.1 56.9L66.6 69.1L78.9 96.0L119.1 105.6L157.8 83.8L167.8 48.2L150.0 31.0L132.2 48.2L142.2 83.8L180.9 105.6L221.1 96.0L233.4 69.1L214.9 56.9L191.4 78.2L192.5 120.7L223.0 152.3L258.0 152.2L267.0 130.7L243.1 119.0L209.9 139.3L198.4 182.4L217.4 217.3L244.8 220.3L249.1 197.9L219.9 180.5L178.2 192.6L155.7 229.4L165.2 260.8L187.7 261.0L191.1 232.6L161.7 204.8L117.1 204.5L89.7 230.8L95.7 255.7L119.2 251.2L128.3 216.4L105.7 178.4L65.5 166.4L40.1 183.6L48.5 204.0L78.6 198.1L98.6 161.3L87.8 118.4L56.7 100.2L36.8 113.7L50.2 135.5L88.2 134.7L119.5 103.0L120.6 62.5L98.2 44.9L82.4 60.9L97.9 89.8L139.8 100.0L177.9 79.0L186.2 46.1L167.3 33.3L150.0 54.7L161.3 92.8L200.0 115.2L237.7 106.1L246.4 81.0L224.8 72.1L199.9 96.7L200.7 140.6L230.0 171.5L261.8 169.9L266.2 148.2L238.4 137.9L203.3 159.5L191.3 202.3L209.4 234.6L234.1 234.1L234.6 209.4L202.3 191.3L159.5 203.3L137.9 238.4L148.2 266.2L169.9 261.8L171.5 230.0L140.6 200.7L96.7 199.9L72.1 224.8L81.0 246.4L106.1 237.7L115.2 200.0L92.8 161.3L54.7 150.0L33.3 167.3L46.1 186.2L79.0 177.9L100.0 139.8L89.8 97.9L60.9 82.4L44.9 98.2L62.5 120.6L103.0 119.5L134.7 88.2L135.5 50.2L113.7 36.8L100.2 56.7L118.4 87.8L161.3 98.6L198.1 78.6L204.0 48.5L183.6 40.1L166.4 65.5L178.4 105.7L216.4 128.3L251.2 119.2L255.7 95.7L230.8 89.7L204.5 117.1L204.8 161.7L232.6 191.1L261.0 187.7L260.8 165.2L229.4 155.7L192.6 178.2L180.5 219.9L197.9 249.1L220.3 244.8L217.3 217.4L182.4 198.4L139.3 209.9L119.0 243.1L130.7 267.0L152.2 258.0L152.3 223.0L120.7 192.5L78.2 191.4L56.9 214.9L69.1 233.4L96.0 221.1L105.6 180.9L83.8 142.2L48.2 132.2L31.0 150.0L48.2 167.8L83.8 157.8L105.6 119.1L96.0 78.9L69.1 66.6L56.9 85.1L78.2 108.6L120.7 107.5L152.3 77.0L152.2 42.0L130.7 33.0L119.0 56.9L139.3 90.1L182.4 101.6L217.3 82.6L220.3 55.2L197.9 50.9L180.5 80.1L192.6 121.8L229.4 144.3L260.8 134.8L261.0 112.3L232.6 108.9L204.8 138.3L204.5 182.9L230.8 210.3L255.7 204.3L251.2 180.8L216.4 171.7L178.4 194.3L166.4 234.5L183.6 259.9L204.0 251.5L198.1 221.4L161.3 201.4L118.4 212.2L100.2 243.3L113.7 263.2L135.5 249.8L134.7 211.8L103.0 180.5L62.5 179.4L44.9 201.8L60.9 217.6L89.8 202.1L100.0 160.2L79.0 122.1L46.1 113.8L33.3 132.7L54.7 150.0L92.8 138.7L115.2 100.0L106.1 62.3L81.0 53.6L72.1 75.2L96.7 100.1L140.6 99.3L171.5 70.0L169.9 38.2L148.2 33.8L137.9 61.6L159.5 96.7L202.3 108.7L234.6 90.6L234.1 65.9L209.4 65.4L191.3 97.7L203.3 140.5L238.4 162.1L266.2 151.8L261.8 130.1L230.0 128.5L200.7 159.4L199.9 203.3L224.8 227.9L246.4 219.0L237.7 193.9L200.0 184.8L161.3 207.2L150.0 245.3L167.3 266.7L186.2 253.9L177.9 221.0L139.8 200.0L97.9 210.2L82.4 239.1L98.2 255.1L120.6 237.5L119.5 197.0L88.2 165.3L50.2 164.5L36.8 186.3L56.7 199.8L87.8 181.6L98.6 138.7L78.6 101.9L48.5 96.0L40.1 116.4L65.5 133.6L105.7 121.6L128.3 83.6L119.2 48.8L95.7 44.3L89.7 69.2L117.1 95.5L161.7 95.2L191.1 67.4L187.7 39.0L165.2 39.2L155.7 70.6L178.2 107.4L219.9 119.5L249.1 102.1L244.8 79.7L217.4 82.7L198.4 117.6L209.9 160.7L243.1 181.0L267.0 169.3L258.0 147.8L223.0 147.7L192.5 179.3L191.4 221.8L214.9 243.1L233.4 230.9L221.1 204.0L180.9 194.4L142.2 216.2L132.2 251.8L150.0 269.0L167.8 251.8L157.8 216.2L119.1 194.4L78.9 204.0L66.6 230.9L85.1 243.1L108.6 221.8L107.5 179.3L77.0 147.7L42.0 147.8L33.0 169.3L56.9 181.0L90.1 160.7L101.6 117.6L82.6 82.7L55.2 79.7L50.9 102.1L80.1 119.5L121.8 107.4L144.3 70.6L134.8 39.2L112.3 39.0L108.9 67.4L138.3 95.2L182.9 95.5L210.3 69.2L204.3 44.3L180.8 48.8L171.7 83.6L194.3 121.6L234.5 133.6L259.9 116.4L251.5 96.0L221.4 101.9L201.4 138.7L212.2 181.6L243.3 199.8L263.2 186.3L249.8 164.5L211.8 165.3L180.5 197.0L179.4 237.5L201.8 255.1L217.6 239.1L202.1 210.2L160.2 200.0L122.1 221.0L113.8 253.9L132.7 266.7L150.0 245.3L138.7 207.2L100.0 184.8L62.3 193.9L53.6 219.0L75.2 227.9L100.1 203.3L99.3 159.4L70.0 128.5L38.2 130.1L33.8 151.8L61.6 162.1L96.7 140.5L108.7 97.7L90.6 65.4L65.9 65.9L65.4 90.6L97.7 108.7L140.5 96.7L162.1 61.6L151.8 33.8L130.1 38.2L128.5 70.0L159.4 99.3L203.3 100.1L227.9 75.2L219.0 53.6L193.9 62.3L184.8 100.0L207.2 138.7L245.3 150.0L266.7 132.7L253.9 113.8L221.0 122.1L200.0 160.2L210.2 202.1L239.1 217.6L255.1 201.8L237.5 179.4L197.0 180.5L165.3 211.8L164.5 249.8L186.3 263.2L199.8 243.3L181.6 212.2L138.7 201.4L101.9 221.4L96.0 251.5L116.4 259.9L133.6 234.5L121.6 194.3L83.6 171.7L48.8 180.8L44.3 204.3L69.2 210.3L95.5 182.9L95.2 138.3L67.4 108.9L39.0 112.3L39.2 134.8L70.6 144.3L107.4 121.8L119.5 80.1L102.1 50.9L79.7 55.2L82.7 82.6L117.6 101.6L160.7 90.1L181.0 56.9L169.3 33.0L147.8 42.0L147.7 77.0L179.3 107.5L221.8 108.6L243.1 85.1L230.9 66.6L204.0 78.9L194.4 119.1L216.2 157.8L251.8 167.8L269.0 150.0Z"/>
+        </svg>
+        <div class="coin-stage">
+          <div class="coin" id="coin">
+            <div class="coin__face coin__face--front">
+          <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Heads">
+            <defs><radialGradient id="metalA" cx="33%" cy="24%" r="86%">
+                <stop offset="0%"   stop-color="#fceecb"/>
+                <stop offset="22%"  stop-color="#eed69d"/>
+                <stop offset="52%"  stop-color="#c9a25a"/>
+                <stop offset="78%"  stop-color="#93702f"/>
+                <stop offset="100%" stop-color="#5b431c"/>
+              </radialGradient>
+              <linearGradient id="sheenA" x1="0" y1="0" x2="0.7" y2="1">
+                <stop offset="0%"   stop-color="#fff6dc" stop-opacity=".55"/>
+                <stop offset="38%"  stop-color="#fff6dc" stop-opacity="0"/>
+                <stop offset="72%"  stop-color="#3a2a10" stop-opacity="0"/>
+                <stop offset="100%" stop-color="#3a2a10" stop-opacity=".35"/>
+              </linearGradient>
+              <filter id="struckA">
+                <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" seed="7" result="grain"/>
+                <feDisplacementMap in="SourceGraphic" in2="grain" scale="1.1" xChannelSelector="R" yChannelSelector="G"/>
+              </filter>
+              <path id="leaf" d="M 0,0 Q 6.2,-7.5 0,-16.5 Q -6.2,-7.5 0,0 Z"/>
+            </defs>
+            <g filter="url(#struckA)">
+            <circle cx="100" cy="100" r="96" fill="url(#metalA)"/>
+            <circle cx="100" cy="100" r="96" fill="url(#sheenA)"/>
+            <circle cx="100" cy="100" r="90.5" fill="none" stroke="#4a3717" stroke-width="4.5"
+                    stroke-dasharray="0 7.6" stroke-linecap="round" opacity=".55"/>
+            <circle cx="100" cy="100" r="83" fill="none" stroke="#4a3717" stroke-width="1.4" opacity=".38"/>
+            <circle cx="100" cy="100" r="80.5" fill="none" stroke="#fbe9bd" stroke-width=".9" opacity=".28"/>
+            <g transform="translate(0,1.5)" fill="#4a3717" opacity=".55"><path d="M 124.54,95.23 L 162.00,100.00 L 124.54,104.77 Z M 124.78,103.27 L 145.40,112.16 L 123.10,109.56 Z M 123.64,108.14 L 153.69,131.00 L 118.87,116.40 Z M 119.83,115.23 L 133.23,133.23 L 115.23,119.83 Z M 116.40,118.87 L 131.00,153.69 L 108.14,123.64 Z M 109.56,123.10 L 112.16,145.40 L 103.27,124.78 Z M 104.77,124.54 L 100.00,162.00 L 95.23,124.54 Z M 96.73,124.78 L 87.84,145.40 L 90.44,123.10 Z M 91.86,123.64 L 69.00,153.69 L 83.60,118.87 Z M 84.77,119.83 L 66.77,133.23 L 80.17,115.23 Z M 81.13,116.40 L 46.31,131.00 L 76.36,108.14 Z M 76.90,109.56 L 54.60,112.16 L 75.22,103.27 Z M 75.46,104.77 L 38.00,100.00 L 75.46,95.23 Z M 75.22,96.73 L 54.60,87.84 L 76.90,90.44 Z M 76.36,91.86 L 46.31,69.00 L 81.13,83.60 Z M 80.17,84.77 L 66.77,66.77 L 84.77,80.17 Z M 83.60,81.13 L 69.00,46.31 L 91.86,76.36 Z M 90.44,76.90 L 87.84,54.60 L 96.73,75.22 Z M 95.23,75.46 L 100.00,38.00 L 104.77,75.46 Z M 103.27,75.22 L 112.16,54.60 L 109.56,76.90 Z M 108.14,76.36 L 131.00,46.31 L 116.40,81.13 Z M 115.23,80.17 L 133.23,66.77 L 119.83,84.77 Z M 118.87,83.60 L 153.69,69.00 L 123.64,91.86 Z M 123.10,90.44 L 145.40,87.84 L 124.78,96.73 Z"/></g>
+            <g transform="translate(0,-1.2)" fill="#fdf1ce" opacity=".42"><path d="M 124.54,95.23 L 162.00,100.00 L 124.54,104.77 Z M 124.78,103.27 L 145.40,112.16 L 123.10,109.56 Z M 123.64,108.14 L 153.69,131.00 L 118.87,116.40 Z M 119.83,115.23 L 133.23,133.23 L 115.23,119.83 Z M 116.40,118.87 L 131.00,153.69 L 108.14,123.64 Z M 109.56,123.10 L 112.16,145.40 L 103.27,124.78 Z M 104.77,124.54 L 100.00,162.00 L 95.23,124.54 Z M 96.73,124.78 L 87.84,145.40 L 90.44,123.10 Z M 91.86,123.64 L 69.00,153.69 L 83.60,118.87 Z M 84.77,119.83 L 66.77,133.23 L 80.17,115.23 Z M 81.13,116.40 L 46.31,131.00 L 76.36,108.14 Z M 76.90,109.56 L 54.60,112.16 L 75.22,103.27 Z M 75.46,104.77 L 38.00,100.00 L 75.46,95.23 Z M 75.22,96.73 L 54.60,87.84 L 76.90,90.44 Z M 76.36,91.86 L 46.31,69.00 L 81.13,83.60 Z M 80.17,84.77 L 66.77,66.77 L 84.77,80.17 Z M 83.60,81.13 L 69.00,46.31 L 91.86,76.36 Z M 90.44,76.90 L 87.84,54.60 L 96.73,75.22 Z M 95.23,75.46 L 100.00,38.00 L 104.77,75.46 Z M 103.27,75.22 L 112.16,54.60 L 109.56,76.90 Z M 108.14,76.36 L 131.00,46.31 L 116.40,81.13 Z M 115.23,80.17 L 133.23,66.77 L 119.83,84.77 Z M 118.87,83.60 L 153.69,69.00 L 123.64,91.86 Z M 123.10,90.44 L 145.40,87.84 L 124.78,96.73 Z"/></g>
+            <g fill="#5d461d" opacity=".93"><path d="M 124.54,95.23 L 162.00,100.00 L 124.54,104.77 Z M 124.78,103.27 L 145.40,112.16 L 123.10,109.56 Z M 123.64,108.14 L 153.69,131.00 L 118.87,116.40 Z M 119.83,115.23 L 133.23,133.23 L 115.23,119.83 Z M 116.40,118.87 L 131.00,153.69 L 108.14,123.64 Z M 109.56,123.10 L 112.16,145.40 L 103.27,124.78 Z M 104.77,124.54 L 100.00,162.00 L 95.23,124.54 Z M 96.73,124.78 L 87.84,145.40 L 90.44,123.10 Z M 91.86,123.64 L 69.00,153.69 L 83.60,118.87 Z M 84.77,119.83 L 66.77,133.23 L 80.17,115.23 Z M 81.13,116.40 L 46.31,131.00 L 76.36,108.14 Z M 76.90,109.56 L 54.60,112.16 L 75.22,103.27 Z M 75.46,104.77 L 38.00,100.00 L 75.46,95.23 Z M 75.22,96.73 L 54.60,87.84 L 76.90,90.44 Z M 76.36,91.86 L 46.31,69.00 L 81.13,83.60 Z M 80.17,84.77 L 66.77,66.77 L 84.77,80.17 Z M 83.60,81.13 L 69.00,46.31 L 91.86,76.36 Z M 90.44,76.90 L 87.84,54.60 L 96.73,75.22 Z M 95.23,75.46 L 100.00,38.00 L 104.77,75.46 Z M 103.27,75.22 L 112.16,54.60 L 109.56,76.90 Z M 108.14,76.36 L 131.00,46.31 L 116.40,81.13 Z M 115.23,80.17 L 133.23,66.77 L 119.83,84.77 Z M 118.87,83.60 L 153.69,69.00 L 123.64,91.86 Z M 123.10,90.44 L 145.40,87.84 L 124.78,96.73 Z"/></g>
+            <circle cx="100" cy="100" r="23.5" fill="url(#metalA)"/>
+            <circle cx="100" cy="100" r="23.5" fill="none" stroke="#4a3717" stroke-width="1.6" opacity=".6"/>
+            <g transform="translate(0,1.5)" fill="#4a3717" opacity=".55"><path d="M 100,82 L 104.2,96.2 L 118,100 L 104.2,103.8 L 100,118 L 95.8,103.8 L 82,100 L 95.8,96.2 Z"/></g>
+            <g transform="translate(0,-1.2)" fill="#fdf1ce" opacity=".42"><path d="M 100,82 L 104.2,96.2 L 118,100 L 104.2,103.8 L 100,118 L 95.8,103.8 L 82,100 L 95.8,96.2 Z"/></g>
+            <g fill="#5d461d" opacity=".93"><path d="M 100,82 L 104.2,96.2 L 118,100 L 104.2,103.8 L 100,118 L 95.8,103.8 L 82,100 L 95.8,96.2 Z"/></g>
+            <path id="topA" d="M 30.5,74.7 A 74,74 0 0 1 169.5,74.7" fill="none"/>
+            <path id="botA" d="M 34.2,123.9 A 70,70 0 0 0 165.8,123.9" fill="none"/>
+            <g font-family="'Bodoni Moda', Didot, Georgia, serif" font-weight="600">
+              <text font-size="19" letter-spacing="5.5" fill="#57411b" opacity=".92">
+                <textPath href="#topA" startOffset="50%" text-anchor="middle">HEADS</textPath>
+              </text>
+              <text font-size="19" letter-spacing="5.5" fill="#fae7ba" opacity=".22" transform="translate(0,-1.1)">
+                <textPath href="#topA" startOffset="50%" text-anchor="middle">HEADS</textPath>
+              </text>
+              <text font-size="10.5" letter-spacing="4" fill="#57411b" opacity=".7">
+                <textPath href="#botA" startOffset="50%" text-anchor="middle">· MMXXVI ·</textPath>
+              </text>
+            </g>
+            </g>
+          </svg>
+            </div>
+            <div class="coin__face coin__face--back">
+          <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Tails">
+            <defs><radialGradient id="metalB" cx="33%" cy="24%" r="86%">
+                <stop offset="0%"   stop-color="#fceecb"/>
+                <stop offset="22%"  stop-color="#eed69d"/>
+                <stop offset="52%"  stop-color="#c9a25a"/>
+                <stop offset="78%"  stop-color="#93702f"/>
+                <stop offset="100%" stop-color="#5b431c"/>
+              </radialGradient>
+              <linearGradient id="sheenB" x1="0" y1="0" x2="0.7" y2="1">
+                <stop offset="0%"   stop-color="#fff6dc" stop-opacity=".55"/>
+                <stop offset="38%"  stop-color="#fff6dc" stop-opacity="0"/>
+                <stop offset="72%"  stop-color="#3a2a10" stop-opacity="0"/>
+                <stop offset="100%" stop-color="#3a2a10" stop-opacity=".35"/>
+              </linearGradient>
+              <filter id="struckB">
+                <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" seed="19" result="grain"/>
+                <feDisplacementMap in="SourceGraphic" in2="grain" scale="1.1" xChannelSelector="R" yChannelSelector="G"/>
+              </filter>
+              <path id="leaf" d="M 0,0 Q 6.2,-7.5 0,-16.5 Q -6.2,-7.5 0,0 Z"/>
+            </defs>
+            <g filter="url(#struckB)">
+            <circle cx="100" cy="100" r="96" fill="url(#metalB)"/>
+            <circle cx="100" cy="100" r="96" fill="url(#sheenB)"/>
+            <circle cx="100" cy="100" r="90.5" fill="none" stroke="#4a3717" stroke-width="4.5"
+                    stroke-dasharray="0 7.6" stroke-linecap="round" opacity=".55"/>
+            <circle cx="100" cy="100" r="83" fill="none" stroke="#4a3717" stroke-width="1.4" opacity=".38"/>
+            <circle cx="100" cy="100" r="80.5" fill="none" stroke="#fbe9bd" stroke-width=".9" opacity=".28"/>
+            <g transform="translate(0,1.5)" fill="#4a3717" opacity=".55"><use href="#leaf" transform="translate(90.97,151.21) rotate(298.00) scale(1.05)"/>
+            <use href="#leaf" transform="translate(77.67,146.96) rotate(313.43) scale(0.99)"/>
+            <use href="#leaf" transform="translate(65.98,139.33) rotate(328.86) scale(0.94)"/>
+            <use href="#leaf" transform="translate(56.75,128.86) rotate(344.29) scale(0.88)"/>
+            <use href="#leaf" transform="translate(50.63,116.32) rotate(359.71) scale(0.82)"/>
+            <use href="#leaf" transform="translate(48.06,102.59) rotate(375.14) scale(0.76)"/>
+            <use href="#leaf" transform="translate(49.25,88.68) rotate(390.57) scale(0.71)"/>
+            <use href="#leaf" transform="translate(54.09,75.59) rotate(406.00) scale(0.65)"/>
+            <use href="#leaf" transform="translate(109.03,151.21) rotate(62.00) scale(1.05)"/>
+            <use href="#leaf" transform="translate(122.33,146.96) rotate(46.57) scale(0.99)"/>
+            <use href="#leaf" transform="translate(134.02,139.33) rotate(31.14) scale(0.94)"/>
+            <use href="#leaf" transform="translate(143.25,128.86) rotate(15.71) scale(0.88)"/>
+            <use href="#leaf" transform="translate(149.37,116.32) rotate(0.29) scale(0.82)"/>
+            <use href="#leaf" transform="translate(151.94,102.59) rotate(-15.14) scale(0.76)"/>
+            <use href="#leaf" transform="translate(150.75,88.68) rotate(-30.57) scale(0.71)"/>
+            <use href="#leaf" transform="translate(145.91,75.59) rotate(-46.00) scale(0.65)"/>
+            <circle cx="90.66" cy="140.44" r="2.60"/>
+            <circle cx="109.34" cy="140.44" r="2.60"/>
+            <circle cx="75.41" cy="133.43" r="2.37"/>
+            <circle cx="124.59" cy="133.43" r="2.37"/>
+            <circle cx="64.18" cy="120.96" r="2.13"/>
+            <circle cx="135.82" cy="120.96" r="2.13"/>
+            <circle cx="58.81" cy="105.06" r="1.90"/>
+            <circle cx="141.19" cy="105.06" r="1.90"/>
+            <path d="M 92,150.5 Q 100,145.5 108,150.5 Q 100,154.5 92,150.5 Z"/></g>
+            <g transform="translate(0,-1.2)" fill="#fdf1ce" opacity=".42"><use href="#leaf" transform="translate(90.97,151.21) rotate(298.00) scale(1.05)"/>
+            <use href="#leaf" transform="translate(77.67,146.96) rotate(313.43) scale(0.99)"/>
+            <use href="#leaf" transform="translate(65.98,139.33) rotate(328.86) scale(0.94)"/>
+            <use href="#leaf" transform="translate(56.75,128.86) rotate(344.29) scale(0.88)"/>
+            <use href="#leaf" transform="translate(50.63,116.32) rotate(359.71) scale(0.82)"/>
+            <use href="#leaf" transform="translate(48.06,102.59) rotate(375.14) scale(0.76)"/>
+            <use href="#leaf" transform="translate(49.25,88.68) rotate(390.57) scale(0.71)"/>
+            <use href="#leaf" transform="translate(54.09,75.59) rotate(406.00) scale(0.65)"/>
+            <use href="#leaf" transform="translate(109.03,151.21) rotate(62.00) scale(1.05)"/>
+            <use href="#leaf" transform="translate(122.33,146.96) rotate(46.57) scale(0.99)"/>
+            <use href="#leaf" transform="translate(134.02,139.33) rotate(31.14) scale(0.94)"/>
+            <use href="#leaf" transform="translate(143.25,128.86) rotate(15.71) scale(0.88)"/>
+            <use href="#leaf" transform="translate(149.37,116.32) rotate(0.29) scale(0.82)"/>
+            <use href="#leaf" transform="translate(151.94,102.59) rotate(-15.14) scale(0.76)"/>
+            <use href="#leaf" transform="translate(150.75,88.68) rotate(-30.57) scale(0.71)"/>
+            <use href="#leaf" transform="translate(145.91,75.59) rotate(-46.00) scale(0.65)"/>
+            <circle cx="90.66" cy="140.44" r="2.60"/>
+            <circle cx="109.34" cy="140.44" r="2.60"/>
+            <circle cx="75.41" cy="133.43" r="2.37"/>
+            <circle cx="124.59" cy="133.43" r="2.37"/>
+            <circle cx="64.18" cy="120.96" r="2.13"/>
+            <circle cx="135.82" cy="120.96" r="2.13"/>
+            <circle cx="58.81" cy="105.06" r="1.90"/>
+            <circle cx="141.19" cy="105.06" r="1.90"/>
+            <path d="M 92,150.5 Q 100,145.5 108,150.5 Q 100,154.5 92,150.5 Z"/></g>
+            <g fill="#5d461d" opacity=".93"><use href="#leaf" transform="translate(90.97,151.21) rotate(298.00) scale(1.05)"/>
+            <use href="#leaf" transform="translate(77.67,146.96) rotate(313.43) scale(0.99)"/>
+            <use href="#leaf" transform="translate(65.98,139.33) rotate(328.86) scale(0.94)"/>
+            <use href="#leaf" transform="translate(56.75,128.86) rotate(344.29) scale(0.88)"/>
+            <use href="#leaf" transform="translate(50.63,116.32) rotate(359.71) scale(0.82)"/>
+            <use href="#leaf" transform="translate(48.06,102.59) rotate(375.14) scale(0.76)"/>
+            <use href="#leaf" transform="translate(49.25,88.68) rotate(390.57) scale(0.71)"/>
+            <use href="#leaf" transform="translate(54.09,75.59) rotate(406.00) scale(0.65)"/>
+            <use href="#leaf" transform="translate(109.03,151.21) rotate(62.00) scale(1.05)"/>
+            <use href="#leaf" transform="translate(122.33,146.96) rotate(46.57) scale(0.99)"/>
+            <use href="#leaf" transform="translate(134.02,139.33) rotate(31.14) scale(0.94)"/>
+            <use href="#leaf" transform="translate(143.25,128.86) rotate(15.71) scale(0.88)"/>
+            <use href="#leaf" transform="translate(149.37,116.32) rotate(0.29) scale(0.82)"/>
+            <use href="#leaf" transform="translate(151.94,102.59) rotate(-15.14) scale(0.76)"/>
+            <use href="#leaf" transform="translate(150.75,88.68) rotate(-30.57) scale(0.71)"/>
+            <use href="#leaf" transform="translate(145.91,75.59) rotate(-46.00) scale(0.65)"/>
+            <circle cx="90.66" cy="140.44" r="2.60"/>
+            <circle cx="109.34" cy="140.44" r="2.60"/>
+            <circle cx="75.41" cy="133.43" r="2.37"/>
+            <circle cx="124.59" cy="133.43" r="2.37"/>
+            <circle cx="64.18" cy="120.96" r="2.13"/>
+            <circle cx="135.82" cy="120.96" r="2.13"/>
+            <circle cx="58.81" cy="105.06" r="1.90"/>
+            <circle cx="141.19" cy="105.06" r="1.90"/>
+            <path d="M 92,150.5 Q 100,145.5 108,150.5 Q 100,154.5 92,150.5 Z"/></g>
+            <g font-family="'Bodoni Moda', Didot, Georgia, serif" font-weight="700" text-anchor="middle">
+              <text x="100" y="106.5" font-size="26" letter-spacing="2" fill="#4a3717" opacity=".5" transform="translate(0,1.4)">SPQR</text>
+              <text x="100" y="106.5" font-size="26" letter-spacing="2" fill="#5d461d">SPQR</text>
+            </g>
+            <path id="topB" d="M 30.5,74.7 A 74,74 0 0 1 169.5,74.7" fill="none"/>
+            <path id="botB" d="M 34.2,123.9 A 70,70 0 0 0 165.8,123.9" fill="none"/>
+            <g font-family="'Bodoni Moda', Didot, Georgia, serif" font-weight="600">
+              <text font-size="19" letter-spacing="5.5" fill="#57411b" opacity=".92">
+                <textPath href="#topB" startOffset="50%" text-anchor="middle">TAILS</textPath>
+              </text>
+              <text font-size="19" letter-spacing="5.5" fill="#fae7ba" opacity=".22" transform="translate(0,-1.1)">
+                <textPath href="#topB" startOffset="50%" text-anchor="middle">TAILS</textPath>
+              </text>
+              <text font-size="10.5" letter-spacing="4" fill="#57411b" opacity=".7">
+                <textPath href="#botB" startOffset="50%" text-anchor="middle">· MMXXVI ·</textPath>
+              </text>
+            </g>
+            </g>
+          </svg>
+            </div>
+          </div>
+        </div>
+        <div class="cast-shadow"></div>
       </div>
     </div>
 
-    <div class="coin-stage">
-      <div class="coin" id="coin">
-        <div class="coin__face coin__face--front">
-          <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <radialGradient id="metal" cx="35%" cy="28%" r="80%">
-                <stop offset="0%" stop-color="#e8c98a"/>
-                <stop offset="45%" stop-color="#b6905a"/>
-                <stop offset="80%" stop-color="#8a6a3e"/>
-                <stop offset="100%" stop-color="#5f4726"/>
-              </radialGradient>
-              <filter id="rough">
-                <feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="2" seed="4" result="n"/>
-                <feDisplacementMap in="SourceGraphic" in2="n" scale="4" xChannelSelector="R" yChannelSelector="G"/>
-              </filter>
-            </defs>
-            <circle cx="100" cy="100" r="92" fill="url(#metal)" filter="url(#rough)"/>
-            <circle cx="100" cy="100" r="86" fill="none" stroke="#4a381e" stroke-width="3.5"
-                    stroke-dasharray="0 8.5" stroke-linecap="round" opacity="0.6"/>
-            <circle cx="100" cy="100" r="78" fill="none" stroke="#4a381e" stroke-width="1" opacity="0.35"/>
-            <g fill="#3d2c16" opacity="0.9" stroke="#3d2c16" stroke-width="1" stroke-linejoin="round">
-              <path d="
-                M 68,52 L 98,50 L 110,60 L 116,70 L 128,80 L 118,88 L 122,92 L 114,97
-                L 116,103 L 106,108 L 96,114 L 84,118 L 78,140 L 78,172 L 44,172
-                L 48,140 L 44,110 L 42,85 L 48,62 Z"/>
-            </g>
-            <circle cx="76" cy="72" r="1.7" fill="#e8c98a" opacity="0.85"/>
-            <g fill="#3d2c16" opacity="0.9">
-              <path d="M 80,50 C 76,42 78,33 86,27 C 81,35 81,44 86,51 C 84,52 82,51 80,50 Z"/>
-              <path d="M 68,53 C 62,47 61,37 67,29 C 63,38 64,47 70,55 C 69,55 68,54 68,53 Z"/>
-              <path d="M 58,62 C 51,58 47,49 51,40 C 49,49 52,58 60,64 C 59,64 59,63 58,62 Z"/>
-              <path d="M 51,76 C 43,74 37,66 38,56 C 38,66 43,74 53,78 C 52,77 51,77 51,76 Z"/>
-            </g>
-            <path id="topArc5" d="M 24,102 A 76,76 0 0 1 176,102" fill="none"/>
-            <text font-family="Georgia, serif" font-size="13" fill="#3d2c16" opacity="0.85" letter-spacing="2.5">
-              <textPath href="#topArc5" startOffset="50%" text-anchor="middle">IMP · CAESAR</textPath>
-            </text>
-          </svg>
-        </div>
-        <div class="coin__face coin__face--back">
-          <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <radialGradient id="metal2" cx="35%" cy="28%" r="80%">
-                <stop offset="0%" stop-color="#e8c98a"/>
-                <stop offset="45%" stop-color="#b6905a"/>
-                <stop offset="80%" stop-color="#8a6a3e"/>
-                <stop offset="100%" stop-color="#5f4726"/>
-              </radialGradient>
-              <filter id="rough2">
-                <feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="2" seed="8" result="n"/>
-                <feDisplacementMap in="SourceGraphic" in2="n" scale="4" xChannelSelector="R" yChannelSelector="G"/>
-              </filter>
-              <path id="feather" d="M 0,0 Q -6,-14 -3,-32 Q -1,-45 0,-50 Q 1,-45 3,-32 Q 6,-14 0,0 Z"/>
-              <path id="tailf" d="M 0,0 Q -4,9 -2,20 Q -1,28 0,31 Q 1,28 2,20 Q 4,9 0,0 Z"/>
-            </defs>
-            <circle cx="100" cy="100" r="92" fill="url(#metal2)" filter="url(#rough2)"/>
-            <circle cx="100" cy="100" r="86" fill="none" stroke="#4a381e" stroke-width="3.5"
-                    stroke-dasharray="0 8.5" stroke-linecap="round" opacity="0.6"/>
-            <circle cx="100" cy="100" r="78" fill="none" stroke="#4a381e" stroke-width="1" opacity="0.35"/>
-            <g fill="#3d2c16" opacity="0.9">
-              <use href="#feather" transform="translate(114,92) rotate(5)  scale(0.75)"/>
-              <use href="#feather" transform="translate(114,92) rotate(25) scale(0.95)"/>
-              <use href="#feather" transform="translate(114,92) rotate(45) scale(1.05)"/>
-              <use href="#feather" transform="translate(114,92) rotate(65) scale(0.95)"/>
-              <use href="#feather" transform="translate(114,92) rotate(83) scale(0.7)"/>
-              <use href="#feather" transform="translate(86,92) rotate(-5)  scale(0.75)"/>
-              <use href="#feather" transform="translate(86,92) rotate(-25) scale(0.95)"/>
-              <use href="#feather" transform="translate(86,92) rotate(-45) scale(1.05)"/>
-              <use href="#feather" transform="translate(86,92) rotate(-65) scale(0.95)"/>
-              <use href="#feather" transform="translate(86,92) rotate(-83) scale(0.7)"/>
-              <path d="M 100,84 C 92,84 87,92 87,102 C 87,112 91,120 100,124
-                       C 109,120 113,112 113,102 C 113,92 108,84 100,84 Z"/>
-              <circle cx="97" cy="78" r="9"/>
-              <path d="M 89,77 L 78,80 L 89,83 Z"/>
-              <use href="#tailf" transform="translate(92,123) rotate(-24)"/>
-              <use href="#tailf" transform="translate(96,124) rotate(-10)"/>
-              <use href="#tailf" transform="translate(100,125) rotate(2)"/>
-              <use href="#tailf" transform="translate(104,124) rotate(14)"/>
-              <use href="#tailf" transform="translate(108,123) rotate(26)"/>
-              <path d="M 95,124 L 92,132 L 97,128 Z"/>
-              <path d="M 105,124 L 108,132 L 103,128 Z"/>
-            </g>
-            <circle cx="94" cy="76" r="1.3" fill="#e8c98a" opacity="0.85"/>
-            <path id="legendArc2" d="M 40,150 A 62,62 0 0 0 160,150" fill="none"/>
-            <text font-family="Georgia, serif" font-size="15" fill="#3d2c16" opacity="0.85" letter-spacing="4">
-              <textPath href="#legendArc2" startOffset="50%" text-anchor="middle">S P Q R</textPath>
-            </text>
-          </svg>
-        </div>
-      </div>
-    </div>
-
-    <div class="result" id="result">Sides are drawn at random — enter names to begin</div>
+    <div class="result muted" id="result">Sides are drawn at random — enter names to begin</div>
 
     <div class="flip-row">
-      <button class="flip-btn" id="flipBtn" disabled>Flip Coin</button>
+      <button class="flip-btn" id="flipBtn" disabled>Flip the coin</button>
     </div>
 
-    <div class="score" id="score"></div>
-    <div class="history-row" id="historyRow"></div>
+    <div class="ledger" id="ledger" hidden>
+      <div class="score" id="score"></div>
+      <div class="history-row" id="historyRow"></div>
+    </div>
+
   </div>
 </div>
-
 <script>
 (function () {
   const params = new URLSearchParams(location.search);
@@ -422,11 +546,14 @@
   const localSideArea = document.getElementById('localSideArea');
   const remoteNameDisplay = document.getElementById('remoteNameDisplay');
   const remoteSideDisplay = document.getElementById('remoteSideDisplay');
+  const territoryMine = document.getElementById('territoryMine');
+  const territoryTheirs = document.getElementById('territoryTheirs');
   const coin = document.getElementById('coin');
   const resultEl = document.getElementById('result');
   const flipBtn = document.getElementById('flipBtn');
   const scoreEl = document.getElementById('score');
   const historyRow = document.getElementById('historyRow');
+  const ledger = document.getElementById('ledger');
 
   let peer, conn, connected = false;
   let localName = '';
@@ -439,7 +566,7 @@
   let myScore = 0, theirScore = 0;
   const history = [];
 
-  localRoleLabel.textContent = isHost ? 'You (host)' : 'You';
+  localRoleLabel.textContent = isHost ? 'You · host' : 'You';
 
   localSideArea.innerHTML =
     '<div class="side-buttons">' +
@@ -452,6 +579,7 @@
 
   function randomSide() { return Math.random() < 0.5 ? 'heads' : 'tails'; }
   function oppositeSide(side) { return side === 'heads' ? 'tails' : 'heads'; }
+  function capitalize(s) { return s ? s[0].toUpperCase() + s.slice(1) : s; }
 
   function mySide() {
     if (!calledSide) return null;
@@ -468,22 +596,21 @@
     tailsBtn.disabled = !canSwap;
     headsBtn.classList.toggle('chosen', mySide() === 'heads');
     tailsBtn.classList.toggle('chosen', mySide() === 'tails');
-    remoteSideDisplay.textContent = calledSide ? ('Side: ' + capitalize(theirSide())) : '';
+    remoteSideDisplay.textContent = (connected && calledSide) ? theirSide() : '';
   }
 
-  function capitalize(s) { return s ? s[0].toUpperCase() + s.slice(1) : s; }
-
   function renderNames() {
-    remoteNameDisplay.textContent = remoteName || 'Waiting to join…';
-    remoteNameDisplay.style.color = remoteName ? 'var(--cream)' : 'var(--cream-dim)';
+    remoteNameDisplay.textContent = remoteName || 'Waiting to join';
+    remoteNameDisplay.classList.toggle('is-empty', !remoteName);
   }
 
   function updateStatus() {
     if (!connected) {
-      statusEl.textContent = isHost ? 'Waiting for opponent to join…' : 'Connecting…';
+      statusEl.textContent = isHost ? 'Waiting for opponent' : 'Connecting';
     } else {
       statusEl.textContent = 'Connected';
     }
+    document.body.classList.toggle('is-live', connected);
   }
 
   function checkReady() {
@@ -505,8 +632,10 @@
     conn.on('data', handleData);
     conn.on('close', function () {
       connected = false;
-      statusEl.textContent = 'Opponent disconnected.';
+      statusEl.textContent = 'Opponent disconnected';
+      document.body.classList.remove('is-live');
       flipBtn.disabled = true;
+      renderSideUI();
     });
   }
 
@@ -520,37 +649,50 @@
       renderSideUI();
       checkReady();
     } else if (msg.type === 'flip') {
-      doFlip(msg.result, true);
+      doFlip(msg.result);
     }
   }
 
-  function doFlip(result, animateFromRemote) {
+  function doFlip(result) {
     flipping = true;
     sidesLocked = true;
     flipBtn.disabled = true;
     renderSideUI();
+
+    territoryMine.classList.remove('is-winner');
+    territoryTheirs.classList.remove('is-winner');
+    resultEl.classList.add('muted');
+    resultEl.textContent = 'In the air';
+
+    document.body.classList.add('is-flipping');
     coin.classList.remove('spinning');
     void coin.offsetWidth;
     coin.classList.add('spinning');
 
     setTimeout(function () {
+      document.body.classList.remove('is-flipping');
       coin.style.transform = result === 'heads' ? 'rotateY(0deg)' : 'rotateY(180deg)';
 
       const winnerIsMe = result === mySide();
       const winnerName = winnerIsMe ? (localName || 'You') : (remoteName || 'Opponent');
-      resultEl.innerHTML = capitalize(result) + ' — <span>' + winnerName + ' wins</span>';
+      resultEl.classList.remove('muted');
+      resultEl.innerHTML = capitalize(result) + ' — <span>' + winnerName + '</span> takes it';
+      (winnerIsMe ? territoryMine : territoryTheirs).classList.add('is-winner');
 
       if (winnerIsMe) myScore++; else theirScore++;
-      scoreEl.innerHTML = (localName || 'You') + ': <strong>' + myScore + '</strong> &nbsp;·&nbsp; ' +
-                           (remoteName || 'Opponent') + ': <strong>' + theirScore + '</strong>';
+      scoreEl.innerHTML = (localName || 'You') + ' <strong>' + myScore + '</strong>' +
+                          ' &nbsp;·&nbsp; ' +
+                          (remoteName || 'Opponent') + ' <strong>' + theirScore + '</strong>';
 
+      ledger.hidden = false;
       history.push(result);
       if (history.length > 10) history.shift();
       historyRow.innerHTML = '';
       history.slice().reverse().forEach(function (r) {
         const chip = document.createElement('div');
-        chip.className = 'chip';
+        chip.className = 'chip' + (r === 'tails' ? ' chip--tails' : '');
         chip.textContent = r === 'heads' ? 'H' : 'T';
+        chip.title = capitalize(r);
         historyRow.appendChild(chip);
       });
 
@@ -558,19 +700,6 @@
       checkReady();
     }, 1100);
   }
-
-  flipBtn.addEventListener('click', function () {
-    if (flipping || flipBtn.disabled) return;
-    const result = Math.random() < 0.5 ? 'heads' : 'tails';
-    send({ type: 'flip', result: result });
-    doFlip(result, false);
-  });
-
-  localNameInput.addEventListener('input', function () {
-    localName = localNameInput.value.trim();
-    send({ type: 'hello', name: localName });
-    checkReady();
-  });
 
   function chooseSide(side) {
     if (sidesLocked || flipping || !connected || side === mySide()) return;
@@ -582,6 +711,19 @@
 
   headsBtn.addEventListener('click', function () { chooseSide('heads'); });
   tailsBtn.addEventListener('click', function () { chooseSide('tails'); });
+
+  flipBtn.addEventListener('click', function () {
+    if (flipping || flipBtn.disabled) return;
+    const result = randomSide();
+    send({ type: 'flip', result: result });
+    doFlip(result);
+  });
+
+  localNameInput.addEventListener('input', function () {
+    localName = localNameInput.value.trim();
+    send({ type: 'hello', name: localName });
+    checkReady();
+  });
 
   copyBtn.addEventListener('click', function () {
     inviteLink.select();
@@ -595,8 +737,7 @@
 
   peer.on('open', function (id) {
     if (isHost) {
-      const link = location.origin + location.pathname + '?room=' + id;
-      inviteLink.value = link;
+      inviteLink.value = location.origin + location.pathname + '?room=' + id;
       inviteBox.hidden = false;
       updateStatus();
     } else {
@@ -614,9 +755,11 @@
   }
 
   peer.on('error', function () {
-    statusEl.textContent = 'Connection error — try reloading the page.';
+    statusEl.textContent = 'Connection error — reload to retry';
+    document.body.classList.remove('is-live');
   });
 
+  renderNames();
   renderSideUI();
 })();
 </script>
