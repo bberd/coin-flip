@@ -51,21 +51,30 @@ thing to do.
 - **Score**: tracked client-side on each browser independently (each side infers
   the same outcome from the same `result` + `calledSide`, so they should always
   agree — not verified in a live test yet).
-- **Coin art**: two hand-built inline SVGs (not images). Obverse is a
-  guillotine — uprights, lintel, mouton, oblique blade and a lunette whose neck
-  hole is cut with `fill-rule="evenodd"` (nothing else in that path overlaps, so
-  evenodd is safe there; if you add an overlapping subpath it will punch an
-  unintended hole). Reverse is a laurel wreath opening at the top around a
-  compass star. The two faces are deliberately unalike — rectilinear and
-  asymmetric against circular and organic — so a glance tells them apart even
-  before you read the name. The wreath is generated from polar math (leaves
-  swept along an arc), so its symmetry is exact rather than hand-tuned; if you
-  edit it, regenerate rather than nudging coordinates.
+- **Coin art**: two hand-built inline SVGs (not images), and both are puns on
+  the side they represent. Obverse (heads) is a **guillotine** — uprights,
+  lintel, mouton, oblique blade and a lunette whose neck hole is cut with
+  `fill-rule="evenodd"`. Reverse (tails) is a **man's head in profile wearing a
+  rattail**, the tail hanging from the nape past the bust truncation; its ear is
+  also an evenodd cut. In both paths nothing else overlaps, which is what makes
+  evenodd safe — add an overlapping subpath and you will punch an unintended
+  hole. The two faces are deliberately unalike, rectilinear against organic, so
+  a glance tells them apart before you read the name.
+- **Drawing the profile is the hard part.** It took ten rendered iterations, and
+  every failure mode is worth knowing before you touch it: straight `L` segments
+  between facial landmarks produce a beak — use `C` curves; the neck must be
+  narrower than the skull with the occiput overhanging it, or head and neck
+  merge into one ball; features need exaggeration, since a 3-unit step is under
+  3px on the rendered coin; and the rattail must be rooted at the *nape* and
+  hang clear of the bust, or it merges into the shoulder and reads as a hook.
+  A hairline groove was tried and removed — it read as a swim cap. Render it
+  before you believe it.
   Relief is faked by drawing each emblem three times: a dark copy offset +1.5px,
   a light copy offset -1.2px, then the solid on top. A
   `feTurbulence`/`feDisplacementMap` filter roughens the strike, and three small
-  verdigris radial gradients stain the disc. Both faces carry "· FORTVNA ·" on
-  the lower rim.
+  verdigris radial gradients stain the disc. The lower rim carries a motto per
+  face: "· CAPVT ·" (head) under the guillotine, "· FORTVNA ·" under the
+  rattail.
 - **The rim inscription**: the upper rim of each face is struck with the *name of
   whoever holds that face* — not the words "heads"/"tails", which appear nowhere
   on the coin. So the face that lands up shows the winner's name. Set by
@@ -81,6 +90,17 @@ thing to do.
   a 66-radius arc). Verified by rendering names of 0, 2, 4, 5, 8, 10, 12, 15 and
   19 characters — the 20-char `maxlength` is the ceiling. If you move the arc,
   re-derive ARC_LIMIT from its radius or long names will overrun the beading.
+
+## Coin layout constraints
+The rim furniture and the emblem share a small disc, and they must not touch:
+- Name inscription: upper arc at r=66, fitted to `ARC_LIMIT` 150 (see above).
+- Motto: lower arc at r=76. Its glyphs grow *inward* from that arc, so at
+  font-size 10.5 they reach about r=65.5.
+- **Emblems must therefore stay inside about r=57**, which leaves ~8 units of
+  clear metal. The guillotine is drawn at a nominal size then scaled 0.9 and
+  lifted 2 units to satisfy this; the profile is drawn within it directly.
+  If you enlarge an emblem, check its extreme points against r=65.5 — the
+  bottom corners of a bust or plinth are what break this first.
 
 ## Design direction — "Struck"
 An engraver's proof sheet at night. The page splits into two mirrored
