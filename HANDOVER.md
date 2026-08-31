@@ -59,7 +59,12 @@ thing to do.
   that size, and the result reads as an hourglass. A notch carved into the
   outline has no such constraint. The beam spans exactly upright-to-upright so
   it reads as connected — touching, never overlapping, since an overlap under
-  evenodd would punch a hole. Reverse (tails) is a **man's head in profile
+  evenodd would punch a hole.
+  The guillotine is authored at nominal size and scaled 0.9 in a build step. If
+  you touch that transform, note that **arc radii are not points**: scaling
+  `A rx,ry` as though it were a coordinate pair (and then again as a radius)
+  silently turns the cradle into a shallow ellipse rather than erroring. It
+  still renders, just wrong — which is how it shipped once. Reverse (tails) is a **man's head in profile
   wearing a rattail**; its ear is an evenodd cut, and nothing in that path
   overlaps. The two faces are deliberately unalike, rectilinear against organic, so
   a glance tells them apart before you read the name.
